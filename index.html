@@ -74,13 +74,16 @@
         <section id="section-home" class="hidden">
             <div class="card summary-card">
                 <div class="summary-header">
-                    
                     <span>Target Hari Ini</span>
-                    </div>
+                    
+                    <button onclick="generateShareImage()" class="btn-share-icon" aria-label="Bagikan ke Story">
+                        <i class="ph ph-share-network"></i>
+                    </button>
+                </div>
                 
                 <div class="target-number">
                     <span id="display-target">0</span>
-                    </div>
+                </div>
 
                 <div class="progress-bar-container">
                     <div class="progress-bar" style="width: 0%"></div>
@@ -115,9 +118,7 @@
             </div>
         </section>
 
-        <button onclick="generateShareImage()" class="btn-primary" style="background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045); color: white; border: none; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 8px;">
-            <i class="ph ph-instagram-logo" style="font-size: 1.2rem;"></i> Bagikan ke Story
-        </button>
+        
 
         <section id="section-input" class="hidden">
             <div class="card input-card">

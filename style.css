@@ -667,3 +667,35 @@ input:focus { border-color: var(--primary); }
     text-transform: uppercase;
     letter-spacing: -2px;
 }
+
+/* === TOMBOL SHARE MINI (DI DALAM CARD) === */
+.btn-share-icon {
+    background: rgba(255, 255, 255, 0.2); /* Transparan Putih */
+    border: none;
+    color: white;
+    width: 35px; height: 35px;
+    border-radius: 50%; /* Bulat */
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+.btn-share-icon:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.btn-share-icon:active {
+    transform: scale(0.95);
+}
+
+/* Pastikan header menyebar (Teks di kiri, Tombol di kanan) */
+/* Ini sudah ada di CSS lama, tapi kita pastikan lagi */
+.summary-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 10px; /* Beri jarak ke angka besar */
+}
