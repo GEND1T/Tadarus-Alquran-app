@@ -1,0 +1,669 @@
+:root {
+    --primary: #0F5132;    /* Hijau Tua */
+    --primary-light: #157347;
+    --gold: #D4AF37;       /* Emas */
+    --bg: #F8F9FA;         /* Putih Tulang */
+    --card-bg: #FFFFFF;
+    --text-dark: #212529;
+    --text-muted: #6C757D;
+    --radius: 16px;
+    --shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+body {
+    background-color: var(--bg);
+    color: var(--text-dark);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Mencegah scroll body utama */
+}
+
+/* === HEADER === */
+.app-header {
+    background: var(--primary);
+    color: white;
+    padding: 20px 20px 30px 20px;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 4px 10px rgba(15, 81, 50, 0.2);
+    flex-shrink: 0;
+}
+
+.app-title { font-family: 'Amiri', serif; font-size: 1.5rem; }
+.app-title span { color: var(--gold); }
+.hijri-date { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
+
+/* === CONTAINER & SECTIONS === */
+.app-container {
+    flex: 1;
+    overflow-y: auto; /* Scroll hanya di area konten */
+    padding: 20px;
+    padding-bottom: 90px; /* Space untuk bottom nav */
+}
+
+
+/* === CARDS === */
+.card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+/* Summary Card Style */
+.summary-card {
+    background: linear-gradient(135deg, var(--primary), #0a3622);
+    color: white;
+}
+.summary-header { display: flex; justify-content: space-between; align-items: center; opacity: 0.9; }
+.target-number { font-size: 3rem; font-weight: 700; margin: 10px 0; color: var(--gold); }
+.target-number small { font-size: 1rem; color: white; font-weight: 400; }
+
+/* Forms */
+.form-group { margin-bottom: 15px; }
+.form-row { display: flex; gap: 10px; }
+label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted); }
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+}
+input:focus { border-color: var(--primary); }
+
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--gold);
+    color: var(--primary);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-primary:active { transform: scale(0.98); }
+
+/* Stats Grid */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+.stat-item {
+    background: white; padding: 15px; border-radius: var(--radius);
+    text-align: center; box-shadow: var(--shadow);
+}
+.stat-label { display: block; font-size: 0.8rem; color: var(--text-muted); }
+.stat-value { display: block; font-size: 1.2rem; font-weight: 600; color: var(--primary); }
+
+/* History List */
+.history-item {
+    display: flex; justify-content: space-between;
+    padding: 15px; background: white;
+    border-radius: 12px; margin-bottom: 10px;
+    border-left: 4px solid var(--gold);
+}
+
+/* === BOTTOM NAV === */
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white; height: 70px;
+    display: flex; justify-content: space-around; align-items: center;
+    border-top: 1px solid #eee;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+    z-index: 100;
+}
+.nav-item {
+    background: none; border: none;
+    display: flex; flex-direction: column; align-items: center;
+    color: #ccc; font-size: 0.8rem; cursor: pointer;
+}
+.nav-item i { font-size: 1.5rem; margin-bottom: 4px; }
+.nav-item.active { color: var(--primary); }
+
+/* Tombol Plus Tengah */
+.center-btn { position: relative; top: -20px; }
+.plus-btn {
+    background: var(--gold); color: white;
+    width: 55px; height: 55px;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.4);
+}
+.plus-btn i { margin: 0; font-size: 1.8rem; }
+
+/* === STATE KHUSUS: TARGET TERCAPAI (GOLD MODE) === */
+.summary-card.gold-mode {
+    /* Gradient Emas Mewah */
+    background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%) !important;
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+    transform: translateY(-2px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efek kilauan (opsional biar makin keren) */
+.summary-card.gold-mode::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-25deg);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    100% { left: 200%; }
+}
+
+/* Penyesuaian Teks di Mode Gold */
+.summary-card.gold-mode .summary-header {
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.summary-card.gold-mode .target-number {
+    color: #fff !important; /* Timpa warna emas lama jadi putih */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.summary-card.gold-mode .target-number small {
+    display: block; /* Turun ke baris baru */
+    font-size: 0.9rem;
+    font-weight: normal;
+    opacity: 0.9;
+    margin-top: -5px;
+}
+
+.summary-card.gold-mode .progress-bar-container {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.summary-card.gold-mode .progress-bar {
+    background: #fff; /* Bar jadi putih */
+}
+
+.summary-card.gold-mode .progress-text {
+    background: rgba(0, 0, 0, 0.1); /* Latar belakang gelap transparan */
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: #fff;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* === STATE: ON PROGRESS (ORANGE MODE) === */
+/* Aktif saat user sudah baca, tapi belum mencapai target */
+.summary-card.orange-mode {
+    background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%) !important;
+    box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
+}
+
+.summary-card.orange-mode .progress-bar {
+    background: #fff;
+}
+
+.summary-card.orange-mode .progress-text {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Pastikan teks judul dan angka tetap putih/terbaca */
+.summary-card.orange-mode .summary-header,
+.summary-card.orange-mode .target-number {
+    color: #fff;
+}
+
+/* === LOGIC DISPLAY (WAJIB ADA) === */
+
+/* Pastikan .hidden menggunakan !important agar tidak bisa dibantah oleh .active */
+.hidden {
+    display: none !important;
+}
+
+.active {
+    display: block;
+    /* Tambahan animasi biar smooth saat muncul */
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* === MODAL STYLES === */
+#modal-bookmark, #modal-welcome {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1000; display: flex; align-items: center; justify-content: center;
+}
+
+
+
+.modal-card {
+    background: white; width: 90%; max-width: 350px;
+    padding: 25px; border-radius: 20px;
+    position: relative; z-index: 1001;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-card h3 { color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.input-highlight { background: #f0fdf4; border: 1px solid var(--primary); color: var(--primary); font-weight: bold; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn-cancel { background: #f1f1f1; color: #555; border: none; padding: 12px; border-radius: 12px; flex: 1; font-weight: 600; cursor: pointer;}
+
+/* Welcome Card Specific */
+.welcome-card { text-align: center; }
+.welcome-icon { font-size: 3rem; margin-bottom: 10px; }
+.last-read-box { 
+    background: #f8f9fa; border: 1px dashed var(--gold); 
+    padding: 15px; border-radius: 12px; margin: 20px 0; 
+}
+.surah-name { font-family: 'Amiri', serif; font-size: 1.8rem; color: var(--primary); font-weight: bold; margin: 5px 0; }
+.ayat-badge { background: var(--gold); color: white; padding: 4px 12px; border-radius: 20px; display: inline-block; font-size: 0.9rem; }
+
+@keyframes popUp {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+
+/* State Aktif: Baru munculkan Flex */
+#modal-bookmark.active, #modal-welcome.active {
+    display: flex !important; /* !important memaksa browser mematuhi ini */
+    animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Pastikan class hidden benar-benar sembunyi */
+.hidden {
+    display: none !important;
+}
+
+.modal-overlay {
+    position: absolute; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+}
+/* ... (kode css modal-card kebawah tetap sama, tidak perlu diubah) ... */
+
+/* === PROFILE STYLES === */
+.profile-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.avatar {
+    width: 80px; height: 80px;
+    background: #e9ecef;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 40px;
+    color: var(--primary);
+    border: 3px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.divider {
+    border: 0; border-top: 1px solid #eee; margin: 25px 0;
+}
+
+/* Tombol Logout (Merah Outline) */
+.btn-danger-outline {
+    width: 100%; padding: 12px;
+    background: white;
+    border: 1px solid #dc3545; /* Merah */
+    color: #dc3545;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: 0.2s;
+}
+.btn-danger-outline:active {
+    background: #dc3545; color: white;
+}
+
+.app-footer {
+    margin-top: 30px; text-align: center;
+    opacity: 0.5; font-size: 0.8rem;
+}
+
+/* === NOTIFICATION STYLES === */
+.notif-card {
+    text-align: center;
+    max-width: 320px;
+    padding-top: 40px; /* Ruang untuk icon melayang */
+    position: relative;
+    overflow: visible; /* Biar icon bisa keluar kotak */
+}
+
+/* Icon Melayang di Atas */
+.notif-icon-box {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: white;
+    border: 4px solid white;
+    position: absolute;
+    top: -35px; left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Warna-Warni Status */
+.status-success { background: var(--gold); } /* Emas untuk Sukses */
+.status-error { background: #dc3545; }   /* Merah untuk Error */
+.status-warning { background: #ffc107; color: #333; } /* Kuning untuk Warning */
+
+/* Typography */
+#notif-title { margin-top: 10px; color: var(--text-dark); }
+#notif-msg { color: #666; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; }
+
+/* Tombol Notif */
+.btn-full { width: 100%; }
+
+
+/* === MODAL STYLES (FINAL & COMPLETE) === */
+
+/* Tambahkan #modal-intro ke sini 👇 */
+/* Update daftar ID ini: */
+#modal-bookmark, #modal-welcome, #modal-notif, #modal-intro, #modal-dev-message { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 2000; 
+    align-items: center; justify-content: center;
+    display: none; 
+}
+
+/* Update daftar Active ini: */
+#modal-bookmark.active, #modal-welcome.active, #modal-notif.active, #modal-intro.active, #modal-dev-message.active {
+    display: flex !important;
+    animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+
+/* === DEV MESSAGE STYLE === */
+.dev-avatar {
+    width: 70px; height: 70px;
+    background: var(--primary);
+    color: var(--gold);
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    border: 4px solid #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* === CUSTOM DRIVER.JS (TUTORIAL) THEME === */
+
+/* 1. Kotak Popover Utama */
+.driver-popover {
+    background-color: #ffffff;
+    border-radius: 20px !important; /* Sudut membulat */
+    padding: 20px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important; /* Bayangan lebih halus */
+    font-family: 'Poppins', sans-serif !important;
+    border: 1px solid rgba(0,0,0,0.05);
+    max-width: 300px !important; /* Agar tidak terlalu lebar di HP */
+}
+
+/* 2. Judul Popover */
+.driver-popover-title {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: var(--primary) !important; /* Hijau Tua */
+    margin-bottom: 8px !important;
+}
+
+/* 3. Isi Teks Deskripsi */
+.driver-popover-description {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    color: #555 !important;
+    margin-bottom: 0 !important;
+}
+
+/* 4. Bagian Tombol Bawah (Footer) */
+.driver-popover-footer {
+    margin-top: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* 5. Tombol "Lanjut" & "Siap" */
+.driver-popover-next-btn, .driver-popover-done-btn {
+    background-color: var(--gold) !important; /* Warna Emas */
+    color: var(--primary) !important; /* Teks Hijau */
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    text-shadow: none !important; /* Hapus shadow bawaan library */
+    transition: 0.2s;
+}
+
+.driver-popover-next-btn:hover, .driver-popover-done-btn:hover {
+    transform: scale(1.05);
+}
+
+/* 6. Tombol "Mundur" */
+.driver-popover-prev-btn {
+    background-color: #f1f1f1 !important;
+    color: #888 !important;
+    border-radius: 10px !important;
+    font-size: 0.85rem !important;
+    border: none !important;
+}
+
+/* 7. Teks Progress (1 of 3) */
+.driver-popover-progress-text {
+    font-size: 0.75rem !important;
+    color: #aaa !important;
+}
+
+/* 8. Panah Kecil (Arrow) di pinggir kotak */
+.driver-popover-arrow-side-left.driver-popover-arrow {
+    border-left-color: #fff !important; 
+}
+.driver-popover-arrow-side-right.driver-popover-arrow {
+    border-right-color: #fff !important; 
+}
+.driver-popover-arrow-side-top.driver-popover-arrow {
+    border-top-color: #fff !important; 
+}
+.driver-popover-arrow-side-bottom.driver-popover-arrow {
+    border-bottom-color: #fff !important; 
+}
+
+/* === SHARE TEMPLATE STYLE (INSTAGRAM STORY) === */
+.share-container {
+    /* Ukuran Fixed Story (HD) */
+    width: 1080px;
+    height: 1920px;
+    
+    /* Warna & Background */
+    background: linear-gradient(135deg, #0F5132 0%, #052c1a 100%);
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    
+    /* Flex Layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 150px 80px;
+    text-align: center;
+    
+    /* Sembunyikan dari layar user biasa */
+    position: fixed;
+    top: 0; left: -9999px; /* Lempar jauh ke kiri */
+    z-index: -1;
+}
+
+/* Header */
+.share-app-name {
+    font-family: 'Amiri', serif;
+    font-size: 5rem;
+    margin-bottom: 20px;
+}
+.share-app-name span { color: #D4AF37; } /* Emas */
+.share-date { font-size: 2rem; opacity: 0.8; letter-spacing: 2px; text-transform: uppercase; }
+
+/* Badge Tengah (Lingkaran) */
+.share-badge {
+    width: 450px; height: 450px; /* Diperkecil dari 600px */
+    margin: 40px 0;
+    border: 6px solid #D4AF37;
+}
+.share-badge p { font-size: 2rem; }
+.share-badge h2 { font-size: 6rem; }
+/* Stats Grid */
+.share-stats {
+    display: flex; gap: 60px; width: 100%; justify-content: center; margin-bottom: 60px;
+}
+.share-stat-box {
+    background: rgba(255,255,255,0.1);
+    padding: 40px 60px;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+}
+.share-stat-box .label { display: block; font-size: 1.8rem; opacity: 0.8; margin-bottom: 10px; }
+.share-stat-box .value { display: block; font-size: 3.5rem; font-weight: bold; color: #D4AF37; }
+
+/* Quote */
+.share-quote {
+    font-family: 'Amiri', serif;
+    font-size: 2.2rem;
+    line-height: 1.6;
+    font-style: italic;
+    opacity: 0.9;
+    max-width: 80%;
+    margin: 0 auto;
+}
+/* === STYLE BARU UNTUK CHART === */
+.share-chart-container {
+    width: 100%;
+    margin-bottom: 50px;
+    padding: 0 40px;
+}
+
+.chart-title {
+    font-size: 2.5rem;
+    color: white;
+    opacity: 0.9;
+    margin-bottom: 20px;
+    text-align: left;
+    padding-left: 20px;
+}
+
+.chart-box-glass {
+    background: rgba(255, 255, 255, 0.1); /* Efek Kaca */
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 40px;
+    padding: 40px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    height: 500px; /* Tinggi Grafik di Story */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* Footer */
+.share-pill {
+    background: #D4AF37;
+    color: #0F5132;
+    padding: 20px 50px;
+    border-radius: 100px;
+    font-size: 2.5rem;
+    font-weight: bold;
+    display: inline-flex; align-items: center; gap: 15px;
+    margin-bottom: 30px;
+}
+.share-footer p { font-size: 1.8rem; opacity: 0.6; }
+
+/* === SHARE TEMPLATE V3 (LUXURY) === */
+.share-container-v3 {
+    width: 1080px; height: 1920px; /* Fixed HD Resolution */
+    background: radial-gradient(circle at top, #0F5132 0%, #022010 100%);
+    color: white; font-family: 'Poppins', sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 120px 80px; text-align: center;
+    position: fixed; top: 0; left: -9999px; z-index: -1; /* Sembunyikan */
+    overflow: hidden;
+}
+
+/* Pattern Overlay Halus (Opsional: Hapus jika tidak suka) */
+.share-bg-pattern {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 1; z-index: 0;
+}
+
+.share-header-v3, .share-content-v3, .share-footer-v3 { position: relative; z-index: 2; }
+
+/* Header */
+.share-app-name { font-family: 'Amiri', serif; font-size: 5rem; margin-bottom: 30px; }
+.share-app-name span { color: #D4AF37; }
+.share-date-box {
+    background: rgba(212, 175, 55, 0.2); border: 3px solid #D4AF37;
+    padding: 15px 50px; border-radius: 100px; display: inline-block;
+}
+.share-date-box p { font-size: 2.2rem; letter-spacing: 4px; font-weight: 700; margin: 0; color: #D4AF37; }
+
+/* Content - Status Hero */
+.status-hero { margin: 80px 0; }
+.status-label { font-size: 2rem; opacity: 0.7; letter-spacing: 5px; margin-bottom: 10px; }
+.status-hero h2 {
+    font-size: 10rem; font-weight: 900; line-height: 1; margin: 0;
+    /* Efek Teks Emas Menyala */
+    background: linear-gradient(to bottom, #FFD700, #D4AF37);
+    -webkit-background-clip: text;
+
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.6));
+}
+
+/* Content - Chart Cleaner */
+.chart-container-v3 {
+    width: 100%; height: 550px; margin-bottom: 60px;
+    padding: 30px; /* Padding lebih kecil biar grafik lebih lebar */
+    /* Glassmorphism yang lebih halus */
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+}
+
+/* Content - Stats Row */
+.stats-row-v3 { display: flex; gap: 50px; justify-content: center; align-items: center; }
+.stats-row-v3 span { font-size: 1.8rem; opacity: 0.7; display: block; margin-bottom: 10px; }
+.stats-row-v3 h4 { font-size: 3.5rem; color: #D4AF37; font-weight: 700; margin: 0; }
+
+/* Footer */
+.share-quote { font-family: 'Amiri', serif; font-size: 2rem; opacity: 0.8; font-style: italic; max-width: 80%; margin: 0 auto 40px; }
+.share-pill { font-size: 1.8rem; opacity: 0.6; display: flex; align-items: center; gap: 10px; }
+
+/* === REVISI STYLE STATUS (KOMPATIBEL HTML2CANVAS) === */
+.status-hero h2 {
+    font-size: 8rem; /* Sedikit diperkecil biar aman */
+    font-weight: 900;
+    line-height: 1;
+    margin: 0;
+    
+    /* GANTI INI: Jangan pakai background-clip (bikin kotak kuning) */
+    color: #FFD700; /* Warna Emas Solid */
+    text-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 2px 2px 0px #b8860b; /* Efek Glow & 3D */
+    
+    text-transform: uppercase;
+    letter-spacing: -2px;
+}

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ramadhan Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0F5132">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#0F5132">
+    <meta name="apple-mobile-web-app-title" content="Ramadhan Tracker">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4358/4358667.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="app-header">
+        
+        <div class="header-content">
+            <h1 class="app-title">Ramadhan<span>Tracker</span></h1>
+            <p class="hijri-date">1 Ramadhan 1447 H</p>
+        </div>
+    </header>
+
+    <main class="app-container">
+
+        <section id="section-auth" class="active">
+            <div class="auth-card">
+                <h2>Bismillah,</h2>
+                <p>Mari set target tadarusmu tahun ini.</p>
+                <form id="form-register">
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="reg-nama" placeholder="Fulan bin Fulan" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Khatam (Kali)</label>
+                        <select id="reg-target">
+                            <option value="1">1x Khatam</option>
+                            <option value="2">2x Khatam</option>
+                            <option value="3">3x Khatam</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hal. Mulai</label>
+                            <input type="number" id="reg-start" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Hal. Akhir</label>
+                            <input type="number" id="reg-end" value="604">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Posisi Saat Ini (Halaman)</label>
+                        <input type="number" id="reg-current" placeholder="Contoh: 10">
+                    </div>
+                    <button type="submit" class="btn-primary">Mulai Perjalanan</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="section-home" class="hidden">
+            <div class="card summary-card">
+                <div class="summary-header">
+                    
+                    <span>Target Hari Ini</span>
+                    </div>
+                
+                <div class="target-number">
+                    <span id="display-target">0</span>
+                    </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 0%"></div>
+                </div>
+                <p class="progress-text">Menghitung...</p>
+            </div>
+
+            
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Sisa Hari</span>
+                    <span class="stat-value" id="display-sisa-hari">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Sisa Hal.</span>
+                    <span class="stat-value" id="display-sisa-hal">-</span>
+                </div>
+            </div>
+
+            <div class="card chart-card">
+                <div class="summary-header" style="margin-bottom: 15px;">
+                    <span style="color:var(--text-muted); font-size:0.9rem;">Tren 7 Hari Terakhir</span>
+                </div>
+                <canvas id="myChart"></canvas> </div>
+
+
+            <div class="history-list">
+                <h3>Riwayat Terakhir</h3>
+                <ul id="history-container" style="list-style: none; padding: 0;">
+                </ul>
+            </div>
+        </section>
+
+        <button onclick="generateShareImage()" class="btn-primary" style="background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045); color: white; border: none; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <i class="ph ph-instagram-logo" style="font-size: 1.2rem;"></i> Bagikan ke Story
+        </button>
+
+        <section id="section-input" class="hidden">
+            <div class="card input-card">
+                <h2>Catat Progres</h2>
+                <p>Update halaman terakhir yang kamu baca.</p>
+                <form id="form-input">
+                    <div class="input-big-wrapper">
+                        <input type="number" id="input-page" placeholder="0">
+                        <span>Halaman</span>
+                    </div>
+                    <button type="submit" class="btn-primary">Simpan Progres</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="section-profile" class="hidden">
+            <div class="card profile-card">
+                <div class="profile-header">
+                    <div class="avatar">
+                        <i class="ph ph-user"></i>
+                    </div>
+                    <h3 id="p-nama-display">Loading...</h3>
+                    <p id="p-joined" style="font-size: 0.8rem; color: #888;">Bergabung: -</p>
+                </div>
+                
+                <hr class="divider">
+
+                <form id="form-profile">
+                    <div class="form-group">
+                        <label>Nama Tampilan</label>
+                        <input type="text" id="p-edit-nama" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Khatam</label>
+                        <select id="p-edit-target">
+                            <option value="1">1x Khatam</option>
+                            <option value="2">2x Khatam</option>
+                            <option value="3">3x Khatam</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hal. Mulai</label>
+                            <input type="number" id="p-edit-start" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Hal. Akhir</label>
+                            <input type="number" id="p-edit-end" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Simpan Perubahan</button>
+                </form>
+
+                <hr class="divider">
+
+                <div style="background: #FFF5F5; padding: 15px; border-radius: 12px; border: 1px dashed #dc3545;">
+                    <h4 style="color:#dc3545; margin-bottom: 5px; font-size: 0.9rem;">Zona Bahaya</h4>
+                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">
+                        Ingin mengulang dari awal? Semua riwayat bacaan akan dihapus permanen.
+                    </p>
+                    <button onclick="handleResetProgress()" class="btn-danger-outline">
+                        <i class="ph ph-arrow-counter-clockwise"></i> Reset Progres Nol
+                    </button>
+                </div>
+
+                
+                
+                <div class="app-footer">
+                    <p>Ramadhan Tracker v1.1</p>
+                </div>
+            </div>
+        </section>
+        
+
+    </main>
+
+
+    <div id="modal-bookmark" class="hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
+            <h3><i class="ph ph-bookmark-simple"></i> Simpan Bookmark</h3>
+            <p>Sistem mendeteksi kamu membaca:</p>
+            
+            <form id="form-bookmark">
+                <div class="form-group">
+                    <label>Surah (Otomatis/Edit)</label>
+                    <input type="text" id="bm-surah" class="input-highlight">
+                </div>
+                <div class="form-group">
+                    <label>Ayat Terakhir Dibaca</label>
+                    <input type="number" id="bm-ayat" placeholder="Contoh: 15" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('modal-bookmark')">Batal</button>
+                    <button type="submit" class="btn-primary">Konfirmasi & Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-welcome" class="hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-card welcome-card">
+            <div class="welcome-icon">👋</div>
+            <h3 id="welcome-title">Ahlan wa Sahlan!</h3>
+            <p id="welcome-msg">Mari lanjutkan tadarusmu.</p>
+            
+            <div class="last-read-box">
+                <small>Terakhir Dibaca:</small>
+                <div id="welcome-surah" class="surah-name">-</div>
+                <div class="ayat-badge">Ayat <span id="welcome-ayat">-</span></div>
+            </div>
+
+            <button class="btn-primary" onclick="closeModal('modal-welcome')">Lanjutkan Mengaji</button>
+        </div>
+    </div>
+
+    <div id="modal-notif" class="hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-card notif-card">
+            <div id="notif-icon-container" class="notif-icon-box">
+                <i id="notif-icon" class="ph ph-check"></i>
+            </div>
+            
+            <h3 id="notif-title">Judul Notif</h3>
+            <p id="notif-msg">Pesan notifikasi muncul di sini.</p>
+            
+            <div class="modal-actions" id="notif-actions">
+                </div>
+        </div>
+    </div>
+    
+    <div id="modal-intro" class="hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-card welcome-card">
+            <div class="welcome-icon">🚀</div>
+            <h3>Selamat Datang!</h3>
+            <p>Aplikasi ini akan membantumu konsisten khatam Al-Quran di bulan Ramadhan.</p>
+            <p style="font-size: 0.9rem; color: #666; margin-top: 10px; margin-bottom: 20px;">
+                Yuk atur target ibadahmu sekarang agar lebih terarah.
+            </p>
+            
+            <button class="btn-primary" onclick="closeModal('modal-intro'); startRegisterTour();">
+                Mulai Atur Target
+            </button>
+        </div>
+    </div>
+    <div id="modal-dev-message" class="hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-card welcome-card">
+            <div class="dev-avatar">
+                <i class="ph ph-code"></i>
+            </div>
+            
+            <h3 style="margin-top: 10px;">Terima Kasih! 🙏</h3>
+            
+            <p style="font-size: 0.95rem; line-height: 1.6; color: #555; margin: 15px 0;">
+                "Alhamdulillah, terima kasih sudah menggunakan <b>Ramadhan Tracker</b>. <br><br>
+                Saya membuat aplikasi ini dengan harapan bisa membantu kita semua (termasuk saya sendiri) agar lebih istiqomah tadarus di bulan suci nanti."
+            </p>
+
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 20px;">
+                <i>- Afin Aditya (Developer)</i>
+            </p>
+            
+            <button class="btn-primary" onclick="closeModal('modal-dev-message'); startTour();">
+                Aamiin, Tunjukkan Caranya
+            </button>
+        </div>
+    </div>
+
+    <div id="share-area" class="share-container-v3">
+        <div class="share-bg-pattern"></div>
+
+        <div class="share-header-v3">
+            <h1 class="share-app-name">Ramadhan<span>Tracker</span></h1>
+            <div class="share-date-box">
+                <p id="share-date-text">RAMADHAN DAY <span id="share-day-num">X</span></p>
+            </div>
+        </div>
+
+        <div class="share-content-v3">
+            <div class="status-hero">
+                <p class="status-label">STATUS HARI INI</p>
+                <h2 id="share-status">TUNTAS</h2>
+            </div>
+
+            <div class="chart-container-v3 chart-box-glass">
+                <canvas id="shareChartCanvas"></canvas>
+            </div>
+            
+            <div class="stats-row-v3">
+                <div>
+                    <span>Total Baca</span>
+                    <h4 id="share-total-read">-</h4>
+                </div>
+                <div style="border-left: 3px solid rgba(255,255,255,0.2); height: 60px;"></div>
+                <div>
+                    <span>Sisa Target</span>
+                    <h4 id="share-left">-</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="share-footer-v3">
+            <p class="share-quote">"Sebaik-baik kalian adalah yang mempelajari Al-Qur'an dan mengajarkannya."</p>
+            <div class="share-pill">
+                <i class="ph ph-instagram-logo"></i> Share your journey
+            </div>
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('section-home')">
+            <i class="ph ph-house"></i>
+            <span>Home</span>
+        </button>
+        <button class="nav-item center-btn" onclick="switchTab('section-input')">
+            <div class="plus-btn"><i class="ph ph-plus"></i></div>
+        </button>
+        <button class="nav-item" onclick="switchTab('section-profile')">
+            <i class="ph ph-user"></i>
+            <span>Profil</span>
+        </button>
+    </nav>
+
+    
+
+    
+
+    <script type="module">
+        // Import fungsi-fungsi penting (Perhatikan ada 'deleteDoc' sekarang)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, limit, doc, updateDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      
+        // --- CONFIG DARI FIREBASE CONSOLE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyAH-o5uYYN8T2lgLrcFDyIlQOEn8c97OFo",
+          authDomain: "ramadhan-tracker-app.firebaseapp.com",
+          databaseURL: "https://ramadhan-tracker-app-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "ramadhan-tracker-app",
+          storageBucket: "ramadhan-tracker-app.firebasestorage.app",
+          messagingSenderId: "1057464459445",
+          appId: "1:1057464459445:web:4af6b030bcffc7edf1defc",
+          measurementId: "G-N18NT0VV9C"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // EKSPOR KE WINDOW (Agar app.js bisa pakai)
+        window.db = db; 
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.query = query;
+        window.where = where;
+        window.onSnapshot = onSnapshot;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.doc = doc;
+        window.updateDoc = updateDoc;
+        window.getDocs = getDocs;
+        window.deleteDoc = deleteDoc; // <--- INI YANG TADI KURANG
+        
+      
+        // Dispatch event tanda Firebase siap
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
+    <script src="app.js"></script>
+
+    
+</body>
+
+</html>
