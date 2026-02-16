@@ -1066,3 +1066,34 @@ input:focus { border-color: var(--primary); }
     from { transform: translateY(-20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+/* === STYLE IKON ANIMASI WELCOME (UPDATE) === */
+.welcome-anim-icon {
+    width: 130px;
+    height: auto;
+    display: block;
+    margin: 0 auto 25px auto;
+    
+    /* === SOLUSI AJAIB UNTUK BACKGROUND PUTIH === */
+    /* 'multiply' akan membuat piksel putih pada GIF menjadi transparan */
+    /* sehingga menyatu dengan background modal. */
+    /* ========================================== */
+    
+    
+    /* Animasi muncul halus */
+    animation: fadeScaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+/* Keyframes tetap sama */
+@keyframes fadeScaleIn {
+    to { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* === FIX BACKGROUND MODAL INTRO === */
+/* Kita paksa khusus kartu modal intro ini jadi putih bersih */
+/* agar menyatu dengan background GIF putih */

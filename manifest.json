@@ -1,6 +1,6 @@
 {
-    "name": "Tadarus.",
-    "short_name": "tTadarus.",
+    "name": "Tadarus.id",
+    "short_name": "Tadarus.id",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#F8F9FA",
@@ -8,7 +8,7 @@
     "orientation": "portrait",
     "icons": [
       {
-        "src": "./icons/quran.png",
+        "src": "./icons/quran (1).png",
         "sizes": "192x192",
         "type": "image/png"
       },
