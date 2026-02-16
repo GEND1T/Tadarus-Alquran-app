@@ -370,20 +370,21 @@ input:focus { border-color: var(--primary); }
 .btn-full { width: 100%; }
 
 
-/* 👇 Tambahkan #modal-rating di sini */
-#modal-bookmark, #modal-welcome, #modal-notif, #modal-intro, #modal-dev-message, #modal-rating { 
+/* === MODAL STYLES (FINAL & COMPLETE) === */
+
+/* 1. Tambahkan #modal-jadwal di daftar ini 👇 */
+#modal-bookmark, #modal-welcome, #modal-notif, #modal-intro, #modal-dev-message, #modal-rating, #modal-jadwal { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 2000; 
+    z-index: 2000; /* Agar di atas Header */
     align-items: center; justify-content: center;
     display: none; 
 }
 
-/* 👇 Tambahkan #modal-rating.active di sini juga */
-#modal-bookmark.active, #modal-welcome.active, #modal-notif.active, #modal-intro.active, #modal-dev-message.active, #modal-rating.active {
+/* 2. Tambahkan #modal-jadwal.active di daftar ini juga 👇 */
+#modal-bookmark.active, #modal-welcome.active, #modal-notif.active, #modal-intro.active, #modal-dev-message.active, #modal-rating.active, #modal-jadwal.active {
     display: flex !important;
     animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
 
 /* === DEV MESSAGE STYLE === */
 .dev-avatar {
@@ -865,3 +866,152 @@ input:focus { border-color: var(--primary); }
 }
 .prayer-item.active span { color: var(--primary); opacity: 1; font-weight: bold; }
 .prayer-item.active strong { color: var(--primary); }
+
+/* === 1. TOMBOL MINI DI HEADER === */
+.prayer-pill-btn {
+    background: rgba(255, 255, 255, 0.15); /* Transparan */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 50px;
+    color: white;
+    font-size: 0.9rem;
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: 0.2s;
+}
+.prayer-pill-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.25); }
+
+/* === 2. STYLE MODAL JADWAL === */
+.modal-header-center { text-align: center; margin-bottom: 20px; }
+
+.prayer-countdown-modal {
+    text-align: center;
+    background: var(--bg);
+    padding: 15px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px dashed var(--gold);
+}
+.prayer-countdown-modal span { font-size: 0.8rem; color: #666; text-transform: uppercase; }
+.prayer-countdown-modal h1 { font-size: 2.5rem; color: var(--primary); margin: 0; font-family: monospace; }
+
+.prayer-list-vertical {
+    display: flex; flex-direction: column; gap: 8px;
+}
+
+.prayer-row {
+    display: flex; justify-content: space-between;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    font-size: 0.95rem;
+}
+
+/* Highlight Sholat Aktif */
+.prayer-row.active {
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+    border-left: 5px solid var(--gold);
+}
+
+/* === REVISI TAMPILAN MODAL JADWAL (PREMIUM) === */
+
+/* 1. Header Lokasi */
+#prayer-location-name {
+    display: inline-block;
+    background: #f1f1f1;
+    padding: 6px 16px;
+    border-radius: 50px;
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* 2. Kotak Hitungan Mundur (Ganti kotak putih jadi Hijau Gradient) */
+.prayer-countdown-modal {
+    background: linear-gradient(135deg, var(--primary), #0a3622); /* Hijau Mewah */
+    padding: 25px;
+    border-radius: 24px;
+    margin: 20px 0;
+    text-align: center;
+    color: white;
+    border: none; /* Hapus border dashed lama */
+    box-shadow: 0 10px 30px rgba(15, 81, 50, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hiasan background tipis (opsional) */
+.prayer-countdown-modal::before {
+    content: '';
+    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.prayer-countdown-modal span {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.prayer-countdown-modal h1 {
+    font-size: 3.2rem;
+    color: var(--gold); /* Angka Emas */
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    line-height: 1.1;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* 3. List Jadwal yang Lebih Bersih */
+.prayer-list-vertical {
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+.prayer-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px;
+    background: #ffffff;
+    border: 1px solid #f0f0f0;
+    border-radius: 16px;
+    font-size: 1rem;
+    color: var(--text-dark);
+    transition: all 0.2s ease;
+}
+
+.prayer-row span:first-child { font-weight: 500; color: #888; }
+.prayer-row span:last-child { font-weight: 700; color: var(--primary); }
+
+/* Highlight Row (Waktu Aktif) */
+.prayer-row.active {
+    background: var(--gold); /* Background Emas */
+    border-color: var(--gold);
+    color: var(--primary); /* Teks Hijau */
+    transform: scale(1.02); /* Sedikit membesar */
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.25);
+    z-index: 1;
+}
+
+.prayer-row.active span:first-child { color: var(--primary); opacity: 0.8; }
+.prayer-row.active span:last-child { color: var(--primary); }
+
+/* 4. Tombol Tutup (Dibuat Lebih Kalem) */
+#modal-jadwal .btn-primary {
+    background: transparent;
+    color: #999;
+    border: none;
+    margin-top: 15px;
+    font-weight: normal;
+}
+#modal-jadwal .btn-primary:hover {
+    color: var(--text-dark);
+    background: #f5f5f5;
+}

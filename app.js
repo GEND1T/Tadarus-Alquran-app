@@ -1372,14 +1372,15 @@ async function fetchPrayerData(lat, lng) {
     }
 }
 
+// === UPDATE LOGIKA TAMPILAN JADWAL ===
+
 function renderPrayerList(timings) {
     const container = document.getElementById('prayer-list-container');
     container.innerHTML = '';
 
-    // Daftar yang mau ditampilkan (Urut)
     const displayList = [
         { key: 'Imsak', label: 'Imsak' },
-        { key: 'Fajr', label: 'Subuh' }, // API Aladhan pakai 'Fajr'
+        { key: 'Fajr', label: 'Subuh' },
         { key: 'Dhuhr', label: 'Dzuhur' },
         { key: 'Asr', label: 'Ashar' },
         { key: 'Maghrib', label: 'Maghrib' },
@@ -1389,11 +1390,11 @@ function renderPrayerList(timings) {
     displayList.forEach(item => {
         const time = timings[item.key];
         const div = document.createElement('div');
-        div.className = 'prayer-item';
-        div.id = `prayer-item-${item.key}`;
+        div.className = 'prayer-row';
+        div.id = `prayer-row-${item.key}`;
         div.innerHTML = `
             <span>${item.label}</span>
-            <strong>${time}</strong>
+            <span>${time}</span>
         `;
         container.appendChild(div);
     });
@@ -1409,61 +1410,59 @@ function startPrayerCountdown(timings) {
 
     function updateTimer() {
         const now = new Date();
-        let nextPrayer = null;
-        let minDiff = Infinity;
         let nextPrayerKey = "";
+        let minDiff = Infinity;
 
-        // Loop cari waktu terdekat yang BELUM lewat
+        // Cari Sholat Selanjutnya
         for (const [key, timeVal] of Object.entries(timings)) {
-            if(!prayerNames[key]) continue; // Skip Sunset/Sunrise dsb
-
+            if(!prayerNames[key]) continue;
             const [hours, minutes] = timeVal.split(':');
             const pTime = new Date();
             pTime.setHours(hours, minutes, 0);
-
             let diff = pTime - now;
-            
-            // Jika waktu sudah lewat hari ini, anggap besok (tapi logika sederhana dulu: cari yang positif terkecil)
+
             if (diff > 0 && diff < minDiff) {
                 minDiff = diff;
-                nextPrayer = pTime;
                 nextPrayerKey = key;
             }
         }
 
-        // Jika semua waktu hari ini sudah lewat (misal habis Isya), targetnya Subuh besok
-        if (!nextPrayer) {
-            // Ambil Subuh hari ini, tambah 1 hari
-            const [hours, minutes] = timings['Fajr'].split(':');
-            nextPrayer = new Date();
-            nextPrayer.setDate(nextPrayer.getDate() + 1);
-            nextPrayer.setHours(hours, minutes, 0);
-            
-            minDiff = nextPrayer - now;
-            nextPrayerKey = 'Fajr';
+        // Jika semua lewat, target Subuh besok
+        if (minDiff === Infinity) {
+             const [hours, minutes] = timings['Fajr'].split(':');
+             const nextDay = new Date();
+             nextDay.setDate(nextDay.getDate() + 1);
+             nextDay.setHours(hours, minutes, 0);
+             minDiff = nextDay - now;
+             nextPrayerKey = 'Fajr';
         }
 
-        // Format Countdown HH:MM:SS
+        // 1. UPDATE TOMBOL MINI DI HEADER (Simpel)
+        // Tampilkan: "Ashar 15:08"
+        const nextName = prayerNames[nextPrayerKey];
+        const nextTime = timings[nextPrayerKey];
+        document.getElementById('mini-prayer-display').innerText = `${nextName} ${nextTime}`;
+
+        // 2. UPDATE COUNTDOWN DI MODAL (Lengkap)
         const h = Math.floor(minDiff / (1000 * 60 * 60));
         const m = Math.floor((minDiff % (1000 * 60 * 60)) / (1000 * 60));
         const s = Math.floor((minDiff % (1000 * 60)) / 1000);
 
-        document.getElementById('next-prayer-timer').innerText = 
-            `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        const countdownStr = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
         
-        document.getElementById('next-prayer-name').innerText = 
-            `Menuju ${prayerNames[nextPrayerKey]}`;
-
-        // Update Highlight di List
-        document.querySelectorAll('.prayer-item').forEach(el => el.classList.remove('active'));
-        const activeItem = document.getElementById(`prayer-item-${nextPrayerKey}`);
-        if(activeItem) {
-            activeItem.classList.add('active');
-            // Auto scroll biar kelihatan
-            activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        // Update elemen modal (hanya jika modal sedang terbuka biar hemat resource, tapi update terus juga gak apa-apa)
+        const modalTimer = document.getElementById('modal-countdown');
+        if(modalTimer) {
+            modalTimer.innerText = countdownStr;
+            document.getElementById('modal-next-name').innerText = `Menuju ${nextName}`;
         }
+
+        // 3. HIGHLIGHT LIST DI MODAL
+        document.querySelectorAll('.prayer-row').forEach(el => el.classList.remove('active'));
+        const activeRow = document.getElementById(`prayer-row-${nextPrayerKey}`);
+        if(activeRow) activeRow.classList.add('active');
     }
 
-    updateTimer(); // Jalan sekali langsung
-    prayerInterval = setInterval(updateTimer, 1000); // Update tiap detik
+    updateTimer();
+    prayerInterval = setInterval(updateTimer, 1000);
 }

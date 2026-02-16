@@ -30,14 +30,11 @@
             <h1 class="app-title">Ramadhan<span>Tracker</span></h1>
             <p class="hijri-date">1 Ramadhan 1447 H</p>
             
-            <div id="prayer-widget" class="prayer-widget hidden">
-                <div class="prayer-countdown">
-                    <span id="next-prayer-name">Mencari Lokasi...</span>
-                    <h2 id="next-prayer-timer">--:--</h2>
-                </div>
-
-                <div class="prayer-list" id="prayer-list-container">
-                    </div>
+            <button onclick="openModal('modal-jadwal')" class="prayer-pill-btn">
+                <i class="ph ph-mosque"></i> 
+                <span id="mini-prayer-display">Memuat...</span>
+                <i class="ph ph-caret-right" style="font-size: 0.8rem; opacity: 0.7;"></i>
+            </button>
             </div>
             </div>
     </header>
@@ -205,7 +202,7 @@
                 
                 
                 <div class="app-footer">
-                    <p>Ramadhan Tracker v1.3</p>
+                    <p>Ramadhan Tracker v1.4</p>
                 </div>
             </div>
         </section>
@@ -383,7 +380,27 @@
         </div>
     </div>
 
-    
+    <div id="modal-jadwal" class="hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-card">
+            <div class="modal-header-center">
+                <h3>Jadwal Sholat</h3>
+                <p id="prayer-location-name" style="font-size: 0.8rem; color: #666;">Lokasi: -</p>
+            </div>
+
+            <div class="prayer-countdown-modal">
+                <span id="modal-next-name">Menuju...</span>
+                <h1 id="modal-countdown">--:--:--</h1>
+            </div>
+
+            <div class="prayer-list-vertical" id="prayer-list-container">
+                </div>
+
+            <button class="btn-primary" onclick="closeModal('modal-jadwal')" style="margin-top: 20px;">
+                Tutup
+            </button>
+        </div>
+    </div>
 
     
 
