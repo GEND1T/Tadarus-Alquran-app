@@ -57,6 +57,9 @@ window.addEventListener('firebase-ready', () => {
 });
 
 function initApp() {
+    // --- TAMBAHAN BARU: UPDATE TANGGAL HEADER ---
+    updateHeaderDate(); 
+    // --------------------------------------------
     if (currentUser) {
         showSection('section-home');
         listenToDashboard(); 
@@ -236,6 +239,7 @@ function listenToDashboard() {
             document.getElementById('p-edit-target').value = user.target_khatam;
             document.getElementById('p-edit-start').value = user.hal_awal; // Baru
             document.getElementById('p-edit-end').value = user.hal_akhir;   // Baru
+            
             // -------------------------------------
             // -------------------------------------
             
@@ -946,4 +950,89 @@ async function generateShareImage() {
             showToast('error', 'Gagal', 'Gagal membuat gambar.');
         }
     }, 300); // Jeda 300ms biar chart render sempurna
+}
+
+// === TOUR KONTEKSTUAL: FITUR SHARE (HARI KE-6) ===
+function checkShareFeatureTour() {
+    // 1. Cek apakah sudah pernah dilihat?
+    if (localStorage.getItem('share_tour_done')) return;
+
+    // 2. Hitung Hari Ramadhan Ke-Berapa
+    // (Sesuaikan tanggal ini dengan tanggal mulai puasa di aplikasi)
+    const ramadhanStart = new Date("2026-02-18"); 
+    const today = new Date();
+    
+    // Hitung selisih waktu
+    const diffTime = today - ramadhanStart;
+    const dayNum = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // 3. LOGIKA PEMICU (HANYA MUNCUL DI HARI KE-6)
+    // Tips Debug: Ganti angka 6 menjadi angka hari ini (misal 1) untuk mengetes sekarang
+    if (dayNum === 1) { 
+        
+        const driver = window.driver.js.driver;
+        const driverObj = driver({
+            showProgress: false,
+            animate: true,
+            allowClose: false,
+            steps: [
+                {
+                    element: '.btn-share-icon', // Target tombol share kecil
+                    popover: {
+                        title: '✨ Konsistensi yang Hebat!',
+                        description: 'Sudah masuk hari ke-6 dan kamu masih bertahan. <br>Bagikan semangatmu ke teman-teman lewat Story sekarang!',
+                        side: "bottom",
+                        align: 'end',
+                        doneBtnText: 'Oke, Paham',
+                        onPopoverRendered: (popover) => {
+                            // Style khusus biar tombolnya emas
+                            const btn = popover.wrapper.querySelector('.driver-popover-done-btn');
+                            if(btn) btn.style.backgroundColor = '#D4AF37';
+                        }
+                    }
+                }
+            ],
+            onDestroyed: () => {
+                // Tandai sudah selesai, jangan muncul lagi besok
+                localStorage.setItem('share_tour_done', 'true');
+            }
+        });
+
+        // Jalankan Tour
+        setTimeout(() => {
+            driverObj.drive();
+        }, 2000); // Muncul 2 detik setelah buka web
+    }
+}
+
+function updateHeaderDate() {
+    const headerDate = document.querySelector('.hijri-date');
+    if (!headerDate) return;
+
+    // TENTUKAN TANGGAL MULAI PUASA (1 Ramadhan)
+    // Format: YYYY-MM-DD
+    const startRamadhan = new Date("2026-02-18"); 
+    const today = new Date();
+
+    // Hitung selisih waktu
+    const diffTime = today - startRamadhan;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // Logika Tampilan
+    if (diffDays < 1) {
+        // Belum mulai (H-Sekian)
+        const daysLeft = Math.abs(diffDays);
+        headerDate.innerText = `Menuju Ramadhan (${daysLeft} Hari Lagi)`;
+    } else if (diffDays > 30) {
+        // Sudah lewat (Syawal)
+        headerDate.innerText = "1 Syawal 1447 H (Taqabbalallahu Minna)";
+    } else {
+        // Sedang Berjalan
+        // +1 karena diffDays start dari 0 jika hari yang sama, tapi kita pakai Math.ceil jadi aman 1
+        // Mari kita pastikan logika hari ke-1:
+        // Jika today == startRamadhan, diff ~0. Sesuatu yang kecil. Math.ceil akan 1 (jika jam today > start)
+        // Kita kunci saja agar minimal 1.
+        const currentDay = diffDays < 1 ? 1 : diffDays;
+        headerDate.innerText = `${currentDay} Ramadhan 1447 H`;
+    }
 }
