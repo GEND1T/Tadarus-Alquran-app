@@ -63,9 +63,11 @@ function initApp() {
     if (currentUser) {
         showSection('section-home');
         listenToDashboard(); 
+        toggleNavbar(true);
     } else {
         // JIKA BELUM LOGIN -> Masuk Register
         showSection('section-auth');
+        toggleNavbar(false);
         
         // --- LOGIKA BARU: POPUP DULU, BARU TOUR ---
         // Cek apakah user sudah pernah menyelesaikan tour?
@@ -98,6 +100,20 @@ function switchTab(sectionId) {
     if(sectionId === 'section-profile') document.querySelector('.nav-item:nth-child(3)').classList.add('active');
 }
 
+// === FUNGSI KONTROL NAVIGASI ===
+function toggleNavbar(show) {
+    const nav = document.getElementById('main-nav');
+    if (nav) {
+        if (show) {
+            nav.classList.remove('hidden');
+            // Sedikit animasi 'Slide Up' biar cantik (opsional)
+            nav.style.animation = "slideUp 0.3s ease-out";
+        } else {
+            nav.classList.add('hidden');
+        }
+    }
+}
+
 function showSection(id) {
     document.querySelectorAll('section').forEach(el => {
         el.classList.add('hidden');   
@@ -127,6 +143,7 @@ if(formRegister) {
                 hal_akhir: parseInt(document.getElementById('reg-end').value),
                 posisi_skrg: parseInt(document.getElementById('reg-current').value || 0),
                 created_at: new Date().toISOString()
+
             };
 
             const docRef = await window.addDoc(window.collection(window.db, "users"), userData);
@@ -136,6 +153,8 @@ if(formRegister) {
             // 2. PINDAH KE HOME
             switchTab('section-home');
             listenToDashboard(); 
+            // TAMPILKAN NAVIGASI SETELAH SUKSES
+            toggleNavbar(true); // <--- TAMBAHKAN INI
 
             // 3. LOGIKA BARU: TUNGGU SEBENTAR -> TUTUP TOAST -> BUKA PESAN DEV
             setTimeout(() => {
