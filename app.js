@@ -1466,3 +1466,50 @@ function startPrayerCountdown(timings) {
     updateTimer();
     prayerInterval = setInterval(updateTimer, 1000);
 }
+
+// === FITUR INSTALL PWA ===
+
+// 1. Dengar Sinyal dari Browser (Hanya jalan di Android/Chrome/Edge)
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Cegah browser menampilkan popup bawaan yang membosankan
+    e.preventDefault();
+    // Simpan event ke variabel global biar bisa dipakai nanti
+    deferredPrompt = e;
+    
+    // Munculkan Banner Install Keren Kita
+    const banner = document.getElementById('install-banner');
+    if(banner) {
+        banner.classList.remove('hidden');
+        banner.style.display = 'flex'; // Pastikan flex tampil
+    }
+});
+
+// 2. Fungsi Saat Tombol "Install" Diklik
+async function installPWA() {
+    if (!deferredPrompt) return;
+
+    // Tampilkan popup asli browser
+    deferredPrompt.prompt();
+
+    // Tunggu user klik "Terima" atau "Tolak"
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+        console.log('User menginstall aplikasi');
+        // Sembunyikan banner karena sudah diinstall
+        hideInstallBanner();
+    }
+    
+    // Reset variabel (karena event cuma bisa dipakai sekali)
+    deferredPrompt = null;
+}
+
+// 3. Fungsi Tutup Banner (Kalau user gak mau)
+function hideInstallBanner() {
+    const banner = document.getElementById('install-banner');
+    if(banner) banner.classList.add('hidden');
+}
+
+// Export fungsi
+window.installPWA = installPWA;
+window.hideInstallBanner = hideInstallBanner;
