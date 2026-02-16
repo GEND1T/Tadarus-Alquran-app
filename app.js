@@ -198,7 +198,7 @@ function listenToDashboard() {
             if (!welcomeShown) {
                 // Pastikan data bookmark BENAR-BENAR ADA sebelum menampilkan
                 if (user.last_surah && user.last_ayat) {
-                    document.getElementById('welcome-title').innerText = `Ahlan, ${user.nama.split(' ')[0]}!`;
+                    document.getElementById('welcome-title').innerText = `Hallo, ${user.nama.split(' ')[0]}!`;
                     document.getElementById('welcome-surah').innerText = user.last_surah;
                     document.getElementById('welcome-ayat').innerText = user.last_ayat;
                     
@@ -212,7 +212,7 @@ function listenToDashboard() {
             // WELCOME POPUP
             if (!sessionStorage.getItem('welcome_shown')) {
                 if(user.last_surah && user.last_ayat) {
-                    document.getElementById('welcome-title').innerText = `Ahlan, ${user.nama.split(' ')[0]}!`;
+                    document.getElementById('welcome-title').innerText = `Hallo, ${user.nama.split(' ')[0]}!`;
                     document.getElementById('welcome-surah').innerText = user.last_surah;
                     document.getElementById('welcome-ayat').innerText = user.last_ayat;
                     openModal('modal-welcome');
@@ -1007,7 +1007,7 @@ async function generateShareImage() {
             });
             
             const link = document.createElement('a');
-            link.download = `RamadhanTracker_Day${diffDays}.png`;
+            link.download = `Tadarus_Day${diffDays}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
 
