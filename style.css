@@ -370,19 +370,16 @@ input:focus { border-color: var(--primary); }
 .btn-full { width: 100%; }
 
 
-/* === MODAL STYLES (FINAL & COMPLETE) === */
-
-/* Tambahkan #modal-intro ke sini 👇 */
-/* Update daftar ID ini: */
-#modal-bookmark, #modal-welcome, #modal-notif, #modal-intro, #modal-dev-message { 
+/* 👇 Tambahkan #modal-rating di sini */
+#modal-bookmark, #modal-welcome, #modal-notif, #modal-intro, #modal-dev-message, #modal-rating { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 2000; 
     align-items: center; justify-content: center;
     display: none; 
 }
 
-/* Update daftar Active ini: */
-#modal-bookmark.active, #modal-welcome.active, #modal-notif.active, #modal-intro.active, #modal-dev-message.active {
+/* 👇 Tambahkan #modal-rating.active di sini juga */
+#modal-bookmark.active, #modal-welcome.active, #modal-notif.active, #modal-intro.active, #modal-dev-message.active, #modal-rating.active {
     display: flex !important;
     animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -698,4 +695,42 @@ input:focus { border-color: var(--primary); }
     justify-content: space-between; 
     align-items: center; 
     margin-bottom: 10px; /* Beri jarak ke angka besar */
+}
+
+/* === RATING STARS STYLE === */
+.star-widget {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.star-widget i {
+    font-size: 2.5rem;
+    color: #e4e5e9; /* Abu-abu (belum dipilih) */
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.star-widget i:hover {
+    transform: scale(1.2);
+}
+
+/* Warna Emas untuk Bintang Terpilih */
+.star-widget i.active {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Khusus Animasi Goyang saat Rating Bagus */
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    50% { transform: rotate(-15deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.star-shake {
+    animation: shake 0.5s ease-in-out;
 }

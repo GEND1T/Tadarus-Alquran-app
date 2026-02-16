@@ -239,6 +239,10 @@ function listenToDashboard() {
             document.getElementById('p-edit-target').value = user.target_khatam;
             document.getElementById('p-edit-start').value = user.hal_awal; // Baru
             document.getElementById('p-edit-end').value = user.hal_akhir;   // Baru
+
+            // --- TAMBAHAN BARU: RATING HARI 26 ---
+            
+            // -------------------------------------
             
             // -------------------------------------
             // -------------------------------------
@@ -1036,3 +1040,128 @@ function updateHeaderDate() {
         headerDate.innerText = `${currentDay} Ramadhan 1447 H`;
     }
 }
+
+// =========================================
+// === FITUR RATING SPESIAL HARI KE-26 (FIXED) ===
+// =========================================
+
+let currentRating = 0;
+
+// --- BAGIAN 1: SETUP UI (Jalankan sekali di paling bawah file) ---
+function setupRatingUIListener() {
+    const stars = document.querySelectorAll('.star');
+    const btnSubmit = document.getElementById('btn-submit-rating');
+    const feedbackArea = document.getElementById('rating-feedback');
+
+    // Penjagaan: Jika elemen tidak ada (misal belum di-load), berhenti.
+    if(stars.length === 0) return;
+
+    stars.forEach(star => {
+        // Hapus listener lama dulu (untuk menghindari duplikasi jika fungsi ini terpanggil ulang)
+        const newStar = star.cloneNode(true);
+        star.parentNode.replaceChild(newStar, star);
+    });
+
+    // Ambil ulang elemen yang sudah bersih dari listener lama
+    const refreshedStars = document.querySelectorAll('.star');
+    
+    refreshedStars.forEach(star => {
+        star.addEventListener('click', () => {
+            const val = parseInt(star.getAttribute('data-value'));
+            currentRating = val;
+            
+            // Loop untuk mewarnai bintang
+            refreshedStars.forEach(s => {
+                const sVal = parseInt(s.getAttribute('data-value'));
+                // Reset kelas animasi dulu
+                s.classList.remove('star-shake'); 
+
+                if (sVal <= val) {
+                    // Bintang Terpilih: Pakai icon solid (isi)
+                    s.classList.remove('ph-star'); 
+                    s.classList.add('ph-star-fill', 'active');
+                } else {
+                    // Bintang Tidak Terpilih: Pakai icon outline (garis)
+                    s.classList.remove('ph-star-fill', 'active');
+                    s.classList.add('ph-star');
+                }
+            });
+
+            // Efek Goyang jika bintang 5
+            if(val === 5) refreshedStars[4].classList.add('star-shake');
+
+            // Munculkan tombol kirim dan textarea
+            btnSubmit.disabled = false;
+            btnSubmit.style.opacity = "1";
+            if(feedbackArea.style.display === "none" || feedbackArea.style.display === "") {
+                 feedbackArea.style.display = "block";
+                 // Beri jeda sedikit agar transisi halus, lalu fokus
+                 setTimeout(() => feedbackArea.focus(), 100);
+            }
+        });
+    });
+}
+
+
+// --- BAGIAN 2: LOGIKA TRIGGER (Panggil di dalam listenToDashboard) ---
+function checkDay26Trigger() {
+    // TENTUKAN TANGGAL MULAI PUASA
+    const ramadhanStart = new Date("2026-02-18"); // <--- PASTI KAN INI BENAR
+    const today = new Date();
+    const diffTime = today - ramadhanStart;
+    const dayNum = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    // --- TIPS DEBUGGING ---
+    // Agar bisa ngetes SEKARANG, ubah angka '26' di bawah menjadi angka hari ini.
+    // Contoh: Jika hari ini 16 Feb 2026 (sebelum mulai), dayNum mungkin negatif atau 0.
+    // Ubah sementara syaratnya menjadi: if (dayNum !== 26 && ...
+    // ATAU ubah ramadhanStart di atas menjadi tanggal 26 hari yang lalu.
+    
+    // KONDISI NORMAL:
+    if (dayNum === 26 && !localStorage.getItem('app_rated')) {
+        console.log("Hari ke-26 terdeteksi! Memunculkan rating...");
+        setTimeout(() => {
+            openModal('modal-rating');
+            // Setup listenernya di sini untuk memastikan elemen sudah siap
+            setupRatingUIListener();
+        }, 3000);
+    }
+}
+
+
+// --- BAGIAN 3: FUNGSI KIRIM (Tetap sama) ---
+async function submitRating() {
+    const btn = document.getElementById('btn-submit-rating');
+    const feedback = document.getElementById('rating-feedback').value;
+    
+    if(currentRating === 0) return; // Jaga-jaga
+
+    btn.innerText = "Mengirim..."; 
+    btn.disabled = true;
+
+    try {
+        const userRef = window.doc(window.db, "users", currentUser);
+        await window.updateDoc(userRef, {
+            app_rating: currentRating,
+            app_feedback: feedback,
+            rating_date: new Date().toISOString()
+        });
+
+        localStorage.setItem('app_rated', 'true');
+        closeModal('modal-rating');
+        showToast('success', 'Terima Kasih! ⭐', 'Masukanmu sangat berarti.');
+
+    } catch (error) {
+        console.error("Gagal rating:", error);
+        // Fallback: anggap sudah rating secara lokal
+        localStorage.setItem('app_rated', 'true');
+        closeModal('modal-rating');
+        showToast('success', 'Tersimpan', 'Ratingmu telah dicatat secara lokal.');
+    } finally {
+         btn.innerText = "Kirim Penilaian"; 
+         btn.disabled = false;
+    }
+}
+
+// Export fungsi agar bisa dipanggil HTML
+window.submitRating = submitRating;

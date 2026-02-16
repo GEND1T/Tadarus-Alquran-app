@@ -194,9 +194,42 @@
             </div>
         </section>
         
+        
 
     </main>
 
+
+    <div id="modal-rating" class="hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-card welcome-card">
+            <div class="welcome-icon" style="font-size: 3rem; margin-bottom: 10px;">🌙</div>
+            
+            <h3 id="rating-title">Malam Puncak Menanti!</h3>
+            
+            <p id="rating-msg" style="font-size: 0.95rem; color: #555; line-height: 1.6; margin: 15px 0;">
+                Tak terasa kita sudah di <b>Hari ke-26</b>. Malam nanti (malam 27) adalah salah satu malam yang sangat diharapkan turunnya Lailatul Qadar.<br><br>
+                Bagaimana pengalamanmu menggunakan Ramadhan Tracker sejauh ini?
+            </p>
+
+            <div class="star-widget">
+                <i class="ph ph-star star" data-value="1"></i>
+                <i class="ph ph-star star" data-value="2"></i>
+                <i class="ph ph-star star" data-value="3"></i>
+                <i class="ph ph-star star" data-value="4"></i>
+                <i class="ph ph-star star" data-value="5"></i>
+            </div>
+            
+            <textarea id="rating-feedback" placeholder="Tulis pesan/kesanmu di sini..." style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid #ddd; margin-top: 10px; display: none;"></textarea>
+
+            <button class="btn-primary" id="btn-submit-rating" onclick="submitRating()" disabled style="margin-top: 20px; opacity: 0.5;">
+                Kirim Penilaian
+            </button>
+            
+            <button class="btn-cancel" onclick="closeModal('modal-rating')" style="margin-top: 10px; background: none; color: #888;">
+                Nanti Saja
+            </button>
+        </div>
+    </div>
 
     <div id="modal-bookmark" class="hidden">
         <div class="modal-overlay"></div>
@@ -234,7 +267,7 @@
                 <div class="ayat-badge">Ayat <span id="welcome-ayat">-</span></div>
             </div>
 
-            <button class="btn-primary" onclick="closeModal('modal-welcome');checkShareFeatureTour();">Lanjutkan Mengaji</button>
+            <button class="btn-primary" onclick="closeModal('modal-welcome');checkShareFeatureTour();checkDay26Trigger();">Lanjutkan Mengaji</button>
         </div>
     </div>
 
@@ -268,6 +301,7 @@
             </button>
         </div>
     </div>
+
     <div id="modal-dev-message" class="hidden">
         <div class="modal-overlay"></div>
         <div class="modal-card welcome-card">
@@ -332,6 +366,8 @@
             </div>
         </div>
     </div>
+
+    
 
     
 
