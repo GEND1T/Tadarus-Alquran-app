@@ -59,6 +59,7 @@ window.addEventListener('firebase-ready', () => {
 function initApp() {
     // --- TAMBAHAN BARU: UPDATE TANGGAL HEADER ---
     updateHeaderDate(); 
+    initPrayerTimes();
     // --------------------------------------------
     if (currentUser) {
         showSection('section-home');
@@ -259,6 +260,10 @@ function listenToDashboard() {
             document.getElementById('p-edit-start').value = user.hal_awal; // Baru
             document.getElementById('p-edit-end').value = user.hal_akhir;   // Baru
 
+            // --- TAMBAHAN BARU: RENDER LENCANA ---
+            renderBadges(user.badges || []); // Kirim array badges user
+            // -------------------------------------
+
             // --- TAMBAHAN BARU: RATING HARI 26 ---
             
             // -------------------------------------
@@ -433,6 +438,9 @@ if(formBookmark) {
         const finalAyat = document.getElementById('bm-ayat').value;
 
         try {
+
+
+            
             const jumlahDibaca = tempNewPage - tempOldPage;
             const todayStr = new Date().toISOString().split('T')[0];
 
@@ -474,6 +482,42 @@ if(formBookmark) {
             showToast('success', 'Tersimpan', `Bookmark diperbarui: ${finalSurah} : ${finalAyat}`);     
             
             switchTab('section-home');
+
+            // ... di dalam formBookmark.addEventListener ...
+        
+            // ... (Proses simpan logs & update user SELESAI) ...
+            
+            // --- TAMBAHAN BARU: CEK LENCANA ---
+            // Kita butuh data log terbaru. Karena log baru saja ditambah,
+            // cara paling aman & cepat adalah panggil ulang fetch log sederhana 
+            // atau kirim log manual. Biar akurat, kita fetch sebentar:
+            
+            const logsRef = window.collection(window.db, "logs");
+            const qLogs = window.query(logsRef, window.where("user_id", "==", currentUser));
+            const logsSnap = await window.getDocs(qLogs);
+            
+            // Buat objek user sementara yang sudah diupdate posisinya
+            const tempUser = { 
+                posisi_skrg: tempNewPage, 
+                hal_awal: parseInt(document.getElementById('reg-start')?.value || 1), // Ambil dari cache/form
+                hal_akhir: parseInt(document.getElementById('reg-end')?.value || 604),
+                badges: [] // Nanti diambil dari DB di fungsi check, tapi di sini kita butuh logic
+                // *Koreksi*: Fungsi checkAndUnlockBadges butuh 'currentBadges' dari DB.
+                // Lebih aman kita fetch user terbaru dulu sedikit.
+            };
+            
+            const userSnap = await window.getDocs(window.query(window.collection(window.db, "users"), window.where("__name__", "==", currentUser)));
+            let latestUser = null;
+            userSnap.forEach(doc => latestUser = doc.data());
+
+            if(latestUser) {
+                 await checkAndUnlockBadges(latestUser, logsSnap.docs); 
+            }
+            // ----------------------------------
+
+            // 5. TUTUP & PINDAH
+            closeModal('modal-bookmark');
+// ...
 
         } catch (error) {
             console.error(error);
@@ -1184,3 +1228,242 @@ async function submitRating() {
 
 // Export fungsi agar bisa dipanggil HTML
 window.submitRating = submitRating;
+
+// === SISTEM GAMIFIKASI (BADGES) ===
+
+// 1. Konfigurasi Lencana (Syarat & Tampilan)
+const BADGES_CONFIG = [
+    {
+        id: "badge_first",
+        name: "Langkah Awal",
+        icon: "ph-footprints",
+        desc: "Melakukan input progres pertama kali.",
+        check: (user, logs) => logs.length >= 1
+    },
+    {
+        id: "badge_spirit",
+        name: "Istiqomah",
+        icon: "ph-fire",
+        desc: "Melakukan input progres sebanyak 5 kali.",
+        check: (user, logs) => logs.length >= 5
+    },
+    {
+        id: "badge_juz1",
+        name: "5 Juz",
+        icon: "ph-book-open-text",
+        desc: "Membaca total 100 halaman.",
+        check: (user, logs) => (user.posisi_skrg - user.hal_awal) >= 100
+    },
+    {
+        id: "badge_khatam",
+        name: "Khatam",
+        icon: "ph-crown",
+        desc: "Menyelesaikan seluruh halaman Al-Quran.",
+        check: (user, logs) => user.posisi_skrg >= user.hal_akhir
+    }
+];
+
+// 2. Fungsi Render (Menampilkan Lencana di Profil)
+function renderBadges(userBadges = []) {
+    const container = document.getElementById('badges-container');
+    if(!container) return;
+    
+    container.innerHTML = ''; // Bersihkan loading
+
+    BADGES_CONFIG.forEach(badge => {
+        // Cek apakah user punya badge ini?
+        const isUnlocked = userBadges.includes(badge.id);
+        
+        const div = document.createElement('div');
+        div.className = `badge-item ${isUnlocked ? 'unlocked' : ''}`;
+        
+        // Tooltip sederhana pakai 'title'
+        div.title = isUnlocked ? "Tercapai!" : "Syarat: " + badge.desc;
+        
+        div.innerHTML = `
+            <div class="badge-icon">
+                <i class="ph ${badge.icon}" ${isUnlocked ? 'style="color: #D4AF37;"' : ''}></i>
+            </div>
+            <span class="badge-name">${badge.name}</span>
+        `;
+        
+        container.appendChild(div);
+    });
+}
+
+// 3. Fungsi Cek & Unlock (Dijalankan setelah input)
+async function checkAndUnlockBadges(user, logs) {
+    let newBadgesUnlocked = [];
+    const currentBadges = user.badges || []; // Ambil array badges user (atau kosong)
+
+    BADGES_CONFIG.forEach(badge => {
+        // Jika belum punya badge ini...
+        if (!currentBadges.includes(badge.id)) {
+            // ...dan syarat terpenuhi
+            if (badge.check(user, logs)) {
+                newBadgesUnlocked.push(badge.id);
+            }
+        }
+    });
+
+    // Jika ada lencana baru yang terbuka
+    if (newBadgesUnlocked.length > 0) {
+        const updatedBadges = [...currentBadges, ...newBadgesUnlocked];
+        
+        // 1. Update Firebase
+        const userRef = window.doc(window.db, "users", currentUser);
+        await window.updateDoc(userRef, {
+            badges: updatedBadges
+        });
+
+        // 2. Tampilkan Notifikasi Meriah
+        newBadgesUnlocked.forEach(badgeId => {
+            const badgeInfo = BADGES_CONFIG.find(b => b.id === badgeId);
+            showToast('success', 'LENCANA BARU! 🏅', `Selamat! Kamu mendapatkan lencana "${badgeInfo.name}"`);
+        });
+    }
+}
+
+// === FITUR JADWAL SHOLAT & IMSAKIYAH ===
+let prayerInterval = null;
+
+function initPrayerTimes() {
+    const widget = document.getElementById('prayer-widget');
+    const locationText = document.getElementById('next-prayer-name');
+    
+    // Tampilkan widget
+    if(widget) widget.classList.remove('hidden');
+
+    // 1. Cek Lokasi User
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                fetchPrayerData(position.coords.latitude, position.coords.longitude);
+            },
+            (error) => {
+                // Jika ditolak/error, pakai Default (Jakarta)
+                console.warn("Lokasi ditolak, pakai default Jakarta.");
+                fetchPrayerData(-6.2088, 106.8456); 
+                showToast('info', 'Lokasi Default', 'Menampilkan jadwal Jakarta karena akses lokasi tidak diizinkan.');
+            }
+        );
+    } else {
+        // Browser jadul
+        fetchPrayerData(-6.2088, 106.8456);
+    }
+}
+
+async function fetchPrayerData(lat, lng) {
+    try {
+        const date = new Date();
+        // Method 20 = Kemenag RI (Penting untuk akurasi di Indo)
+        const url = `https://api.aladhan.com/v1/timings/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}?latitude=${lat}&longitude=${lng}&method=20`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        const timings = data.data.timings;
+
+        renderPrayerList(timings);
+        startPrayerCountdown(timings);
+
+    } catch (error) {
+        console.error("Gagal ambil jadwal:", error);
+        document.getElementById('next-prayer-name').innerText = "Gagal memuat jadwal";
+    }
+}
+
+function renderPrayerList(timings) {
+    const container = document.getElementById('prayer-list-container');
+    container.innerHTML = '';
+
+    // Daftar yang mau ditampilkan (Urut)
+    const displayList = [
+        { key: 'Imsak', label: 'Imsak' },
+        { key: 'Fajr', label: 'Subuh' }, // API Aladhan pakai 'Fajr'
+        { key: 'Dhuhr', label: 'Dzuhur' },
+        { key: 'Asr', label: 'Ashar' },
+        { key: 'Maghrib', label: 'Maghrib' },
+        { key: 'Isha', label: 'Isya' }
+    ];
+
+    displayList.forEach(item => {
+        const time = timings[item.key];
+        const div = document.createElement('div');
+        div.className = 'prayer-item';
+        div.id = `prayer-item-${item.key}`;
+        div.innerHTML = `
+            <span>${item.label}</span>
+            <strong>${time}</strong>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function startPrayerCountdown(timings) {
+    if(prayerInterval) clearInterval(prayerInterval);
+
+    const prayerNames = {
+        'Imsak': 'Imsak', 'Fajr': 'Subuh', 'Dhuhr': 'Dzuhur', 
+        'Asr': 'Ashar', 'Maghrib': 'Maghrib', 'Isha': 'Isya'
+    };
+
+    function updateTimer() {
+        const now = new Date();
+        let nextPrayer = null;
+        let minDiff = Infinity;
+        let nextPrayerKey = "";
+
+        // Loop cari waktu terdekat yang BELUM lewat
+        for (const [key, timeVal] of Object.entries(timings)) {
+            if(!prayerNames[key]) continue; // Skip Sunset/Sunrise dsb
+
+            const [hours, minutes] = timeVal.split(':');
+            const pTime = new Date();
+            pTime.setHours(hours, minutes, 0);
+
+            let diff = pTime - now;
+            
+            // Jika waktu sudah lewat hari ini, anggap besok (tapi logika sederhana dulu: cari yang positif terkecil)
+            if (diff > 0 && diff < minDiff) {
+                minDiff = diff;
+                nextPrayer = pTime;
+                nextPrayerKey = key;
+            }
+        }
+
+        // Jika semua waktu hari ini sudah lewat (misal habis Isya), targetnya Subuh besok
+        if (!nextPrayer) {
+            // Ambil Subuh hari ini, tambah 1 hari
+            const [hours, minutes] = timings['Fajr'].split(':');
+            nextPrayer = new Date();
+            nextPrayer.setDate(nextPrayer.getDate() + 1);
+            nextPrayer.setHours(hours, minutes, 0);
+            
+            minDiff = nextPrayer - now;
+            nextPrayerKey = 'Fajr';
+        }
+
+        // Format Countdown HH:MM:SS
+        const h = Math.floor(minDiff / (1000 * 60 * 60));
+        const m = Math.floor((minDiff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((minDiff % (1000 * 60)) / 1000);
+
+        document.getElementById('next-prayer-timer').innerText = 
+            `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        
+        document.getElementById('next-prayer-name').innerText = 
+            `Menuju ${prayerNames[nextPrayerKey]}`;
+
+        // Update Highlight di List
+        document.querySelectorAll('.prayer-item').forEach(el => el.classList.remove('active'));
+        const activeItem = document.getElementById(`prayer-item-${nextPrayerKey}`);
+        if(activeItem) {
+            activeItem.classList.add('active');
+            // Auto scroll biar kelihatan
+            activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }
+
+    updateTimer(); // Jalan sekali langsung
+    prayerInterval = setInterval(updateTimer, 1000); // Update tiap detik
+}

@@ -739,3 +739,129 @@ input:focus { border-color: var(--primary); }
     from { transform: translateY(100%); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+
+/* === GAMIFICATION / BADGES STYLE === */
+.badges-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 Kolom */
+    gap: 10px;
+}
+
+.badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    opacity: 0.3; /* Pudar kalau belum dapat */
+    filter: grayscale(100%); /* Hitam putih */
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.badge-icon {
+    font-size: 2rem;
+    color: var(--gold);
+    background: white;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-bottom: 5px;
+    border: 2px solid #ddd;
+}
+
+.badge-name {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #666;
+    line-height: 1.2;
+}
+
+/* KONDISI: LENCANA TERBUKA (UNLOCKED) */
+.badge-item.unlocked {
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: translateY(-5px);
+}
+
+.badge-item.unlocked .badge-icon {
+    border-color: var(--gold);
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.4);
+    animation: popBadge 0.5s ease;
+}
+
+@keyframes popBadge {
+    0% { transform: scale(0); }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* === WIDGET JADWAL SHOLAT === */
+.prayer-widget {
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.1); /* Efek Kaca */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 15px;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Bagian Countdown Besar */
+.prayer-countdown {
+    text-align: center;
+    margin-bottom: 15px;
+}
+.prayer-countdown span {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.prayer-countdown h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 5px 0 0 0;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* List Jadwal Horizontal */
+.prayer-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto; /* Bisa scroll samping */
+    padding-bottom: 5px;
+    scrollbar-width: none; /* Sembunyikan scrollbar di Firefox */
+}
+.prayer-list::-webkit-scrollbar { display: none; } /* Sembunyikan di Chrome */
+
+.prayer-item {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    border-radius: 10px;
+    min-width: 70px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: 0.2s;
+}
+
+.prayer-item span { display: block; font-size: 0.7rem; opacity: 0.7; margin-bottom: 2px; }
+.prayer-item strong { display: block; font-size: 0.9rem; color: white; }
+
+/* Highlight Sholat Aktif (Next) */
+.prayer-item.active {
+    background: var(--gold);
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+    transform: translateY(-2px);
+}
+.prayer-item.active span { color: var(--primary); opacity: 1; font-weight: bold; }
+.prayer-item.active strong { color: var(--primary); }

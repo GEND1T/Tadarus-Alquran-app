@@ -26,11 +26,20 @@
 <body>
 
     <header class="app-header">
-        
         <div class="header-content">
             <h1 class="app-title">Ramadhan<span>Tracker</span></h1>
             <p class="hijri-date">1 Ramadhan 1447 H</p>
-        </div>
+            
+            <div id="prayer-widget" class="prayer-widget hidden">
+                <div class="prayer-countdown">
+                    <span id="next-prayer-name">Mencari Lokasi...</span>
+                    <h2 id="next-prayer-timer">--:--</h2>
+                </div>
+
+                <div class="prayer-list" id="prayer-list-container">
+                    </div>
+            </div>
+            </div>
     </header>
 
     <main class="app-container">
@@ -143,6 +152,13 @@
                     <h3 id="p-nama-display">Loading...</h3>
                     <p id="p-joined" style="font-size: 0.8rem; color: #888;">Bergabung: -</p>
                 </div>
+
+                <div class="badges-section"></div>
+                    <h4 style="text-align:center; margin-bottom:15px; color:#555;">Pencapaian Saya</h4>
+                    <div class="badges-grid" id="badges-container">
+                        <div class="badge-loading">Memuat Lencana...</div>
+                    </div>
+                </div>
                 
                 <hr class="divider">
 
@@ -189,7 +205,7 @@
                 
                 
                 <div class="app-footer">
-                    <p>Ramadhan Tracker v1.2</p>
+                    <p>Ramadhan Tracker v1.3</p>
                 </div>
             </div>
         </section>
