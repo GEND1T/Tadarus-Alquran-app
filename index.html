@@ -137,6 +137,45 @@
             </div>
         </section>
 
+
+        <section id="section-quran" class="hidden">
+
+            <div class="card" style="margin-bottom: 20px; border-radius: 0 0 16px 16px; margin-top: -20px; border-top: none;">
+                <div class="form-group" style="position: relative;">
+                    <i class="ph ph-magnifying-glass" style="position: absolute; left: 15px; top: 15px; color: #888;"></i>
+                    <input type="text" id="search-surah" placeholder="Cari Surah..." onkeyup="filterSurah()" 
+                           style="padding-left: 40px; border-radius: 20px;">
+                </div>
+            </div>
+
+            <div id="surah-list-container" class="quran-list-grid">
+                <div style="text-align:center; padding: 20px; color: #888;">
+                    Memuat Daftar Surah...
+                </div>
+            </div>
+
+            <div id="ayat-view-container" class="ayat-view-overlay hidden">
+                <div class="ayat-view-header" style="justify-content: space-between;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button onclick="closeAyatView()"><i class="ph ph-arrow-left"></i></button>
+                        <h3 id="view-surah-name" style="font-size:1.1rem; margin:0;">Surah</h3>
+                    </div>
+                    
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <div class="jump-ayat-box">
+                            <input type="number" id="jump-ayat-input" placeholder="Ayat.." onchange="jumpToVerseManual()">
+                        </div>
+                
+                        <button onclick="openModal('modal-quran-settings')" style="font-size:1.2rem; padding:5px;">
+                            <i class="ph ph-gear"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="ayat-list-content" class="ayat-scroll-area">
+                    </div>
+            </div>
+        </section>
+
         
 
         <section id="section-input" class="hidden">
@@ -215,7 +254,7 @@
                 
                 
                 <div class="app-footer">
-                    <p>Tadarus.id v1.7</p>
+                    <p>Tadarus.id v1.8</p>
                 </div>
             </div>
         </section>
@@ -322,7 +361,7 @@
                 Yuk atur target ibadahmu sekarang agar lebih terarah.
             </p>
             
-            <button class="btn-primary" onclick="closeModal('modal-intro'); startRegisterTour()">
+            <button class="btn-primary" onclick="closeModal('modal-intro');startRegisterTour()">
                 Mulai Atur Target
             </button>
         </div>
@@ -414,6 +453,57 @@
         </div>
     </div>
 
+    <div id="modal-resume" class="hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-card welcome-card">
+            <img src="./icons/al-quran.gif" alt="Selamat Datang" class="welcome-anim-icon">
+            
+            <h3>Lanjut Mengaji?</h3>
+            <p style="color:#666; font-size: 0.9rem; margin-bottom:15px;">
+                Terakhir kamu membaca sampai:
+            </p>
+    
+            <div class="last-read-box">
+                <div id="resume-surah-name" class="surah-name">-</div>
+                <div class="ayat-badge">Ayat <span id="resume-ayat-num">-</span></div>
+            </div>
+    
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('modal-resume')">Batal</button>
+                <button class="btn-primary" onclick="confirmResumeReading()">Ya, Lanjut</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-quran-settings" class="hidden">
+        <div class="modal-overlay" onclick="closeModal('modal-quran-settings')"></div>
+        <div class="modal-card">
+            <h3><i class="ph ph-sliders"></i> Tampilan Bacaan</h3>
+            <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">Sesuaikan kenyamanan membacamu.</p>
+    
+            <div class="setting-item">
+                <span><i class="ph ph-translate"></i> Terjemahan (Indo)</span>
+                <label class="switch">
+                    <input type="checkbox" id="check-translation" checked onchange="saveQuranSettings()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+    
+            <div class="setting-item" style="margin-top:15px;">
+                <span><i class="ph ph-text-aa"></i> Latin (Transliterasi)</span>
+                <label class="switch">
+                    <input type="checkbox" id="check-latin" onchange="saveQuranSettings()">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+    
+            <button class="btn-primary" onclick="closeModal('modal-quran-settings')" style="margin-top:25px;">
+                Selesai
+            </button>
+        </div>
+    </div>
+
+
     
 
     
@@ -427,9 +517,25 @@
             <i class="ph ph-house"></i>
             <span>Home</span>
         </button>
-        <button class="nav-item center-btn" onclick="switchTab('section-input')">
-            <div class="plus-btn"><i class="ph ph-plus"></i></div>
+
+        <button class="nav-item" onclick="switchTab('section-quran')">
+            <i class="ph ph-book-open-text"></i>
+            <span>Al-Qur'an</span>
         </button>
+        
+        <div class="nav-item-center">
+            <button class="center-btn" onclick="switchTab('section-input')">
+                <div class="plus-btn">
+                    <i class="ph ph-plus"></i>
+                </div>
+            </button>
+        </div>
+        
+        <button class="nav-item" onclick="openModal('modal-jadwal')">
+            <i class="ph ph-clock-afternoon"></i>
+            <span>Jadwal</span>
+        </button>
+
         <button class="nav-item" onclick="switchTab('section-profile')">
             <i class="ph ph-user"></i>
             <span>Profil</span>

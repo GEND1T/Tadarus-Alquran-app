@@ -1,6 +1,12 @@
 // === KONFIGURASI ===
 let myChart = null; // Variabel global untuk menyimpan instance Chart
 let globalHistory = [];
+let currentUserData = null;
+// Default Settings: Terjemahan ON, Latin OFF
+let quranSettings = JSON.parse(localStorage.getItem('user_quran_settings')) || {
+    translation: true,
+    latin: false
+};          
 // === DATA PETA AL-QURAN (Mapping Halaman ke Surah) ===
 const quranMap = [
     [1, "Al-Fatihah"], [2, "Al-Baqarah"], [50, "Ali 'Imran"], [77, "An-Nisa'"],
@@ -60,6 +66,7 @@ function initApp() {
     // --- TAMBAHAN BARU: UPDATE TANGGAL HEADER ---
     updateHeaderDate(); 
     initPrayerTimes();
+    
     // --------------------------------------------
     if (currentUser) {
         showSection('section-home');
@@ -82,24 +89,44 @@ function initApp() {
         // oleh tombol "Mulai" di dalam modal-intro (lihat HTML langkah 1)
     }
 }
-
 // === NAVIGASI ===
 function switchTab(sectionId) {
+    // 1. Sembunyikan semua section
     document.querySelectorAll('section').forEach(el => {
         el.classList.add('hidden');
         el.classList.remove('active');
     });
     
+    // 2. Tampilkan section yang dituju
     const target = document.getElementById(sectionId);
     if(target) {
         target.classList.remove('hidden');
         target.classList.add('active');
     }
 
+    // 3. Hapus efek 'active' dari semua tombol navigasi
     document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-    if(sectionId === 'section-home') document.querySelector('.nav-item:nth-child(1)').classList.add('active');
-    if(sectionId === 'section-profile') document.querySelector('.nav-item:nth-child(3)').classList.add('active');
+    
+    // 4. Berikan efek 'active' ke tombol yang benar berdasarkan posisinya di HTML
+    if(sectionId === 'section-home') {
+        document.querySelector('#main-nav :nth-child(1)').classList.add('active');
+    }
+    
+    if(sectionId === 'section-quran') {
+        document.querySelector('#main-nav :nth-child(2)').classList.add('active');
+        
+        // Panggil fungsi Al-Quran saat tab ini dibuka
+        if (typeof fetchSurahList === 'function') fetchSurahList();
+        if (typeof checkResumeReading === 'function') checkResumeReading();
+    }
+    
+    if(sectionId === 'section-profile') {
+        // Profil sekarang ada di anak ke-5 (Home, Quran, Plus, Jadwal, Profil)
+        document.querySelector('#main-nav :nth-child(5)').classList.add('active');
+    }
 }
+// === NAVIGASI ===
+
 
 // === FUNGSI KONTROL NAVIGASI ===
 function toggleNavbar(show) {
@@ -191,6 +218,8 @@ function listenToDashboard() {
         
         if (docSnap.exists()) {
             const user = docSnap.data();
+            // === TAMBAHKAN BARIS INI (PENTING) ===
+            currentUserData = user;
             globalPosisiSkrg = user.posisi_skrg || 0;
 
             // --- REVISI FITUR WELCOME POPUP ---
@@ -262,14 +291,7 @@ function listenToDashboard() {
 
             // --- TAMBAHAN BARU: RENDER LENCANA ---
             renderBadges(user.badges || []); // Kirim array badges user
-            // -------------------------------------
-
-            // --- TAMBAHAN BARU: RATING HARI 26 ---
             
-            // -------------------------------------
-            
-            // -------------------------------------
-            // -------------------------------------
             
 
         } else {
@@ -282,7 +304,7 @@ function listenToDashboard() {
 
 function calculateSmartTarget(user, capaianHariIni, history) {
     const todayStr = new Date().toISOString().split('T')[0];
-    const ramadhanEnd = new Date("2026-03-20"); 
+    const ramadhanEnd = new Date("2026-03-19"); 
     const today = new Date();
     
     let diffTime = ramadhanEnd - today;
@@ -828,7 +850,7 @@ function startTour() {
                 } 
             },
             { 
-                element: '.nav-item:nth-child(3)', 
+                element: '.bottom-nav', 
                 popover: { 
                     title: 'Profil & Reset', 
                     description: 'Ingin ubah target khatam atau reset ulang? Masuk ke menu Profil di sini.' 
@@ -853,6 +875,7 @@ function startRegisterTour() {
     if (localStorage.getItem('reg_tour_done')) return;
 
     const driver = window.driver.js.driver;
+    
 
     const tour = driver({
         showProgress: true,
@@ -889,10 +912,16 @@ function startRegisterTour() {
         ],
         onDestroyed: () => {
             localStorage.setItem('reg_tour_done', 'true');
+            
+            
         }
+        
+        
     });
 
     tour.drive();
+    
+    
 }
 
 // === FITUR SHARE STORY V2.0 (DENGAN GRAFIK) ===
@@ -937,7 +966,7 @@ async function generateShareImage() {
     }
 
     // 3. LOGIKA TANGGAL & STATUS
-    const ramadhanStart = new Date("2026-02-18"); 
+    const ramadhanStart = new Date("2026-02-19"); 
     const diffTime = Math.abs(today - ramadhanStart);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
     document.getElementById('share-day-num').innerText = diffDays;
@@ -1026,7 +1055,7 @@ function checkShareFeatureTour() {
 
     // 2. Hitung Hari Ramadhan Ke-Berapa
     // (Sesuaikan tanggal ini dengan tanggal mulai puasa di aplikasi)
-    const ramadhanStart = new Date("2026-02-18"); 
+    const ramadhanStart = new Date("2026-02-19"); 
     const today = new Date();
     
     // Hitung selisih waktu
@@ -1035,7 +1064,7 @@ function checkShareFeatureTour() {
 
     // 3. LOGIKA PEMICU (HANYA MUNCUL DI HARI KE-6)
     // Tips Debug: Ganti angka 6 menjadi angka hari ini (misal 1) untuk mengetes sekarang
-    if (dayNum === 1) { 
+    if (dayNum === 6) { 
         
         const driver = window.driver.js.driver;
         const driverObj = driver({
@@ -1078,7 +1107,7 @@ function updateHeaderDate() {
 
     // TENTUKAN TANGGAL MULAI PUASA (1 Ramadhan)
     // Format: YYYY-MM-DD
-    const startRamadhan = new Date("2026-02-18"); 
+    const startRamadhan = new Date("2026-02-19"); 
     const today = new Date();
 
     // Hitung selisih waktu
@@ -1169,7 +1198,7 @@ function setupRatingUIListener() {
 // --- BAGIAN 2: LOGIKA TRIGGER (Panggil di dalam listenToDashboard) ---
 function checkDay26Trigger() {
     // TENTUKAN TANGGAL MULAI PUASA
-    const ramadhanStart = new Date("2026-02-18"); // <--- PASTI KAN INI BENAR
+    const ramadhanStart = new Date("2026-02-19"); // <--- PASTI KAN INI BENAR
     const today = new Date();
     const diffTime = today - ramadhanStart;
     const dayNum = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -1325,38 +1354,58 @@ async function checkAndUnlockBadges(user, logs) {
 }
 
 // === FITUR JADWAL SHOLAT & IMSAKIYAH ===
+// === FITUR JADWAL SHOLAT & IMSAKIYAH (UPDATE LOKASI OTOMATIS) ===
 let prayerInterval = null;
 
 function initPrayerTimes() {
-    const widget = document.getElementById('prayer-widget');
-    const locationText = document.getElementById('next-prayer-name');
-    
-    // Tampilkan widget
-    if(widget) widget.classList.remove('hidden');
-
-    // 1. Cek Lokasi User
+    // 1. Cek Lokasi User via GPS Browser
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                fetchPrayerData(position.coords.latitude, position.coords.longitude);
+                // Dapat lokasi, kirim koordinat, isDefault = false
+                fetchPrayerData(position.coords.latitude, position.coords.longitude, false);
             },
             (error) => {
-                // Jika ditolak/error, pakai Default (Jakarta)
+                // Jika user menolak akses lokasi, pakai Default (Jakarta)
                 console.warn("Lokasi ditolak, pakai default Jakarta.");
-                fetchPrayerData(-6.2088, 106.8456); 
+                fetchPrayerData(-6.2088, 106.8456, true); 
                 showToast('info', 'Lokasi Default', 'Menampilkan jadwal Jakarta karena akses lokasi tidak diizinkan.');
+                
             }
         );
     } else {
-        // Browser jadul
-        fetchPrayerData(-6.2088, 106.8456);
+        // Browser jadul yang tidak support GPS
+        fetchPrayerData(-6.2088, 106.8456, true);
+        startRegisterTour()
     }
 }
 
-async function fetchPrayerData(lat, lng) {
+async function fetchPrayerData(lat, lng, isDefault = false) {
     try {
+        const locNameEl = document.getElementById('prayer-location-name');
+
+        // === 1. TERJEMAHKAN KOORDINAT JADI NAMA KOTA ===
+        if (isDefault) {
+            if (locNameEl) locNameEl.innerText = "Lokasi: Jakarta Pusat (Default)";
+        } else {
+            try {
+                if (locNameEl) locNameEl.innerText = "Mendeteksi lokasi...";
+                // Gunakan API gratis untuk mengubah Lat/Lng menjadi Nama Kota
+                const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`);
+                const geoData = await geoRes.json();
+                
+                // Ambil data kota/kabupaten/kecamatan
+                const city = geoData.locality || geoData.city || geoData.principalSubdivision || "Lokasi Anda";
+                if (locNameEl) locNameEl.innerText = `Lokasi: ${city}`;
+            } catch (e) {
+                console.warn("Gagal menerjemahkan nama lokasi");
+                if (locNameEl) locNameEl.innerText = "Lokasi: Titik GPS Ditemukan";
+            }
+        }
+
+        // === 2. AMBIL JADWAL SHOLAT (ALADHAN) ===
         const date = new Date();
-        // Method 20 = Kemenag RI (Penting untuk akurasi di Indo)
+        // Method 20 = Kemenag RI (Standard Indonesia)
         const url = `https://api.aladhan.com/v1/timings/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}?latitude=${lat}&longitude=${lng}&method=20`;
         
         const response = await fetch(url);
@@ -1368,7 +1417,8 @@ async function fetchPrayerData(lat, lng) {
 
     } catch (error) {
         console.error("Gagal ambil jadwal:", error);
-        document.getElementById('next-prayer-name').innerText = "Gagal memuat jadwal";
+        const locNameEl = document.getElementById('prayer-location-name');
+        if (locNameEl) locNameEl.innerText = "Gagal memuat jadwal";
     }
 }
 
@@ -1513,3 +1563,360 @@ function hideInstallBanner() {
 // Export fungsi
 window.installPWA = installPWA;
 window.hideInstallBanner = hideInstallBanner;
+
+// ==========================================
+// === FITUR AL-QURAN DIGITAL (API V4) ===
+// ==========================================
+
+let allSurahList = []; // Cache daftar surah
+
+// 1. Ambil Daftar Surah (Dipanggil saat tab Quran dibuka)
+async function fetchSurahList() {
+    const container = document.getElementById('surah-list-container');
+    
+    // Cek jika data sudah ada, jangan fetch ulang (hemat kuota)
+    if(allSurahList.length > 0) {
+        renderSurahList(allSurahList);
+        return;
+    }
+
+    try {
+        const response = await fetch('https://api.quran.com/api/v4/chapters?language=id');
+        const data = await response.json();
+        allSurahList = data.chapters;
+        renderSurahList(allSurahList);
+    } catch (error) {
+        container.innerHTML = '<p style="text-align:center; color:red;">Gagal memuat data. Cek koneksi internet.</p>';
+        console.error(error);
+    }
+}
+
+// 2. Render List ke HTML
+function renderSurahList(chapters) {
+    const container = document.getElementById('surah-list-container');
+    container.innerHTML = '';
+
+    chapters.forEach(surah => {
+        const div = document.createElement('div');
+        div.className = 'surah-item';
+        div.onclick = () => openSurahDetail(surah.id, surah.name_simple);
+        
+        
+        div.innerHTML = `
+            <div style="display:flex; align-items:center;">
+                <div class="surah-number">${surah.id}</div>
+                <div>
+                    <h4 style="margin:0; font-size:1rem;">${surah.name_simple}</h4>
+                    <span style="font-size:0.8rem; color:#888;">${surah.translated_name.name} • ${surah.verses_count} Ayat</span>
+                </div>
+            </div>
+            <div class="surah-name-arabic">${surah.name_arabic}</div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// 3. Filter Pencarian Surah
+function filterSurah() {
+    const query = document.getElementById('search-surah').value.toLowerCase();
+    const filtered = allSurahList.filter(s => 
+        s.name_simple.toLowerCase().includes(query) || 
+        s.translated_name.name.toLowerCase().includes(query)
+    );
+    renderSurahList(filtered);
+}
+
+// 4. Buka Detail Ayat (Reader)
+// Update parameter fungsi ini
+async function openSurahDetail(chapterId, nameSimple, targetAyat = null) {
+    const viewContainer = document.getElementById('ayat-view-container');
+    const contentDiv = document.getElementById('ayat-list-content');
+    const titleHeader = document.getElementById('view-surah-name');
+
+    viewContainer.classList.remove('hidden');
+    titleHeader.innerText = nameSimple;
+
+    // Loading State
+    if(targetAyat) {
+        contentDiv.innerHTML = `<div style="text-align:center; padding:50px;">
+            <div class="spinner"></div>
+            <p>Mencari Ayat ${targetAyat}...</p>
+        </div>`;
+    } else {
+        contentDiv.innerHTML = '<div style="text-align:center; padding:50px;">Memuat Ayat...</div>';
+    }
+
+    try {
+        // === PERBAIKAN URL API ===
+        // translations=33 (Indo) KOMMA 57 (Latin)
+        // Hapus parameter &transliterations=... karena tidak valid
+        const url = `https://api.quran.com/api/v4/verses/by_chapter/${chapterId}?language=id&fields=text_uthmani,page_number&translations=33,57&per_page=300`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        // Kirim data ke render
+        renderAyat(data.verses, nameSimple, chapterId, targetAyat);
+
+    } catch (error) {
+        console.error("Gagal load ayat:", error);
+        contentDiv.innerHTML = '<p style="text-align:center; color:red;">Gagal memuat ayat. Cek koneksi internet.</p>';
+    }
+}
+
+// 5. Render Ayat (FIXED: Masalah Tanda Petik)
+function renderAyat(verses, surahName, currentChapterId, targetAyat = null) { 
+    const container = document.getElementById('ayat-list-content');
+    container.innerHTML = '';
+    container.scrollTop = 0;
+
+    // Terapkan setting (Hide/Show)
+    applyViewSettings();
+
+    const safeSurahName = surahName.replace(/'/g, "\\'"); 
+
+    verses.forEach(verse => {
+        const pageNum = verse.page_number;
+        const ayatNum = verse.verse_key.split(':')[1];
+        const textArab = verse.text_uthmani;
+
+        // === LOGIKA BARU MEMISAHKAN INDO & LATIN ===
+        let textIndo = "";
+        let textLatin = "";
+
+        // Loop semua terjemahan yang didapat
+        if (verse.translations) {
+            verse.translations.forEach(t => {
+                if (t.resource_id === 33) {
+                    // ID 33 = Bahasa Indonesia
+                    textIndo = t.text.replace(/<sup.*?<\/sup>/g, ''); // Bersihkan footnote
+                } else if (t.resource_id === 57) {
+                    // ID 57 = Transliterasi (Latin)
+                    textLatin = t.text;
+                }
+            });
+        }
+        // ==========================================
+
+        const div = document.createElement('div');
+        div.className = 'ayat-row';
+        div.id = `verse-${ayatNum}`;
+
+        if (targetAyat && parseInt(ayatNum) === parseInt(targetAyat)) {
+            div.style.backgroundColor = "#fff9c4"; 
+            div.style.border = "2px solid #D4AF37";
+        }
+
+        div.innerHTML = `
+            <div class="ayat-meta">
+                <span class="ayat-badge">Ayat ${ayatNum}</span>
+                <button class="btn-save-ayat" onclick="saveFromDigitalQuran(${pageNum}, '${safeSurahName}', ${ayatNum})">
+                    <i class="ph ph-bookmark-simple"></i> Simpan Hal ${pageNum}
+                </button>
+            </div>
+            
+            <div class="text-arab">${textArab}</div>
+            
+            <div class="text-latin">${textLatin}</div>
+            
+            <div class="text-indo">${textIndo}</div>
+        `;
+        container.appendChild(div);
+    });
+
+    // B. Logika Tombol Next Surah (YANG DIPERBAIKI)
+    const nextId = parseInt(currentChapterId) + 1;
+    
+    if (nextId <= 114) {
+        // Cari nama surat selanjutnya
+        const nextSurahObj = allSurahList.find(s => s.id === nextId);
+        const nextName = nextSurahObj ? nextSurahObj.name_simple : "Surat Berikutnya";
+
+        // === PERBAIKAN: AMANKAN TANDA PETIK ===
+        const safeNextName = nextName.replace(/'/g, "\\'"); 
+        // ======================================
+
+        const nextDiv = document.createElement('div');
+        nextDiv.className = 'next-surah-container';
+        nextDiv.innerHTML = `
+            <p style="color:#888; margin-bottom:10px; font-size:0.9rem;">Selesai membaca ${surahName}?</p>
+            
+            <button class="btn-next-surah" onclick="openSurahDetail(${nextId}, '${safeNextName}')">
+                Lanjut ke ${nextName} <i class="ph ph-arrow-right"></i>
+            </button>
+        `;
+        container.appendChild(nextDiv);
+    } else {
+        // Jika Khatam (Surat 114)
+        const finishDiv = document.createElement('div');
+        finishDiv.className = 'next-surah-container';
+        finishDiv.innerHTML = `
+            <p style="color:var(--gold); font-weight:bold; font-size:1.1rem;">✨ Alhamdulillah, Khatam! ✨</p>
+        `;
+        container.appendChild(finishDiv);
+    }
+
+    // Auto Scroll Logic
+    if (targetAyat) {
+        setTimeout(() => {
+            const element = document.getElementById(`verse-${targetAyat}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                showToast('success', 'Ketemu!', `Melompat ke Ayat ${targetAyat}`);
+            }
+        }, 500);
+    }
+}
+// ==========================================
+// === INTEGRASI QURAN DIGITAL KE FORM UTAMA ===
+// ==========================================
+
+function saveFromDigitalQuran(page, surahName, ayatNum) {
+    // 1. Tutup Tampilan Baca
+    closeAyatView();
+    
+    // 2. Pindah ke Tab Home
+    switchTab('section-home');
+
+    // 3. [PENTING] Update Variabel Global
+    // Ini kuncinya: Kita paksa isi variabel tempNewPage agar tombol Simpan di modal bekerja
+    tempNewPage = parseInt(page); 
+    tempOldPage = globalPosisiSkrg; // Update posisi lama juga untuk validasi
+
+    // 4. Isi Formulir Input di Dashboard (Visual saja, agar user melihat angkanya berubah)
+    const inputField = document.getElementById('input-page');
+    if(inputField) {
+        inputField.value = page;
+    }
+
+    // 5. Isi Data Lengkap ke Modal Bookmark
+    // Karena dari digital Quran, kita sudah tahu pasti Nama Surat & Ayatnya
+    // Jadi kita tidak perlu menebak (getSurahByPage), langsung isi saja.
+    document.getElementById('bm-surah').value = surahName;
+    document.getElementById('bm-ayat').value = ayatNum;
+
+    // 6. Buka Modal Konfirmasi (Sama seperti saat tekan tombol Simpan manual)
+    setTimeout(() => {
+        openModal('modal-bookmark');
+        showToast('info', 'Data Terisi', `Melanjutkan ${surahName} Ayat ${ayatNum}`);
+    }, 300); // Beri jeda sedikit agar transisi tab selesai
+}
+
+
+// ==========================================
+// === FUNGSI TAMBAHAN (YANG HILANG) ===
+// ==========================================
+
+// Fungsi untuk menutup tampilan baca ayat
+function closeAyatView() {
+    const viewContainer = document.getElementById('ayat-view-container');
+    if (viewContainer) {
+        viewContainer.classList.add('hidden');
+    }
+}
+
+// Pastikan fungsi ini bisa dibaca oleh HTML (Global)
+window.closeAyatView = closeAyatView;
+
+// 1. Cek & Tampilkan Popup (Dipanggil saat Switch Tab)
+function checkResumeReading() {
+    // Pastikan data user ada & memiliki riwayat bacaan
+    if (currentUserData && currentUserData.last_surah && currentUserData.last_ayat) {
+        
+        // Isi Data ke Modal
+        document.getElementById('resume-surah-name').innerText = currentUserData.last_surah;
+        document.getElementById('resume-ayat-num').innerText = currentUserData.last_ayat;
+        
+        // Tampilkan Popup
+        // Beri jeda sedikit agar transisi tab selesai dulu baru popup muncul
+        setTimeout(() => {
+            openModal('modal-resume');
+        }, 400); 
+    }
+}
+
+// 2. Eksekusi Lanjut Baca (Saat tombol "Ya, Lanjut" diklik)
+function confirmResumeReading() {
+    closeModal('modal-resume');
+
+    const surahName = currentUserData.last_surah;
+    const ayatNum = currentUserData.last_ayat;
+
+    // Cari ID Surah berdasarkan Nama
+    if (allSurahList.length === 0) {
+        // Jika cache kosong, fetch dulu (jarang terjadi, tapi jaga-jaga)
+        fetchSurahList().then(() => {
+            const surahObj = allSurahList.find(s => s.name_simple === surahName);
+            if(surahObj) openSurahDetail(surahObj.id, surahName, ayatNum);
+        });
+    } else {
+        const surahObj = allSurahList.find(s => s.name_simple === surahName);
+        if (surahObj) {
+            openSurahDetail(surahObj.id, surahName, ayatNum);
+        }
+    }
+}
+
+// ==========================================
+// === LOGIKA SETTING & TOOLS QURAN ===
+// ==========================================
+
+// 1. Fungsi Lompat ke Ayat (Input Header)
+function jumpToVerseManual() {
+    const val = document.getElementById('jump-ayat-input').value;
+    if(!val) return;
+
+    const targetId = `verse-${val}`;
+    const el = document.getElementById(targetId);
+
+    if(el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Beri efek kedip
+        el.style.transition = "background 0.5s";
+        el.style.backgroundColor = "#fff9c4";
+        setTimeout(() => {
+            el.style.backgroundColor = "transparent";
+        }, 2000);
+    } else {
+        showToast('error', 'Tidak Ketemu', `Ayat ${val} tidak ada di surat ini.`);
+    }
+}
+
+// 2. Fungsi Simpan Setting (Dari Modal)
+function saveQuranSettings() {
+    quranSettings.translation = document.getElementById('check-translation').checked;
+    quranSettings.latin = document.getElementById('check-latin').checked;
+
+    // Simpan ke LocalStorage
+    localStorage.setItem('user_quran_settings', JSON.stringify(quranSettings));
+    
+    // Terapkan langsung (Realtime)
+    applyViewSettings();
+}
+
+// 3. Fungsi Terapkan Class CSS
+function applyViewSettings() {
+    const container = document.getElementById('ayat-list-content');
+    if(!container) return;
+
+    // Atur Checkbox di Modal sesuai state terakhir
+    const chkTrans = document.getElementById('check-translation');
+    const chkLatin = document.getElementById('check-latin');
+    if(chkTrans) chkTrans.checked = quranSettings.translation;
+    if(chkLatin) chkLatin.checked = quranSettings.latin;
+
+    // Toggle Class di Container Utama
+    // Jika user minta translation OFF -> Tambah class .hide-translation
+    if (quranSettings.translation) {
+        container.classList.remove('hide-translation');
+    } else {
+        container.classList.add('hide-translation');
+    }
+
+    // Jika user minta latin OFF -> Tambah class .hide-latin
+    if (quranSettings.latin) {
+        container.classList.remove('hide-latin');
+    } else {
+        container.classList.add('hide-latin');
+    }
+}
