@@ -1035,7 +1035,7 @@ function checkShareFeatureTour() {
 
     // 3. LOGIKA PEMICU (HANYA MUNCUL DI HARI KE-6)
     // Tips Debug: Ganti angka 6 menjadi angka hari ini (misal 1) untuk mengetes sekarang
-    if (dayNum === 1) { 
+    if (dayNum === 6) { 
         
         const driver = window.driver.js.driver;
         const driverObj = driver({
