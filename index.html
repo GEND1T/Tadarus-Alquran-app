@@ -40,6 +40,19 @@
     </header>
 
     <main class="app-container">
+        <div id="install-banner" class="card install-card hidden">
+            <div class="install-content">
+                <div class="install-icon-bg">
+                    <i class="ph ph-download-simple"></i>
+                </div>
+                <div class="install-text">
+                    <h4>Pasang Aplikasi</h4>
+                    <p>Akses lebih cepat & offline.</p>
+                </div>
+            </div>
+            <button onclick="installPWA()" class="btn-install">Install</button>
+            <button onclick="hideInstallBanner()" class="btn-close-install"><i class="ph ph-x"></i></button>
+        </div>
 
         <section id="section-auth" class="active">
             <div class="auth-card">
@@ -78,19 +91,6 @@
         </section>
 
         <section id="section-home" class="hidden">
-            <div id="install-banner" class="card install-card hidden">
-                <div class="install-content">
-                    <div class="install-icon-bg">
-                        <i class="ph ph-download-simple"></i>
-                    </div>
-                    <div class="install-text">
-                        <h4>Pasang Aplikasi</h4>
-                        <p>Akses lebih cepat & offline.</p>
-                    </div>
-                </div>
-                <button onclick="installPWA()" class="btn-install">Install</button>
-                <button onclick="hideInstallBanner()" class="btn-close-install"><i class="ph ph-x"></i></button>
-            </div>
             <div class="card summary-card">
                 <div class="summary-header">
                     <span>Target Hari Ini</span>
