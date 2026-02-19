@@ -58,8 +58,7 @@ window.addEventListener('firebase-ready', () => {
 
 function initApp() {
     // --- TAMBAHAN BARU: UPDATE TANGGAL HEADER ---
-    updateHeaderDate(); 
-    initPrayerTimes();
+    updateHeaderDate();
     // --------------------------------------------
     if (currentUser) {
         showSection('section-home');
@@ -888,7 +887,8 @@ function startRegisterTour() {
             }
         ],
         onDestroyed: () => {
-            localStorage.setItem('reg_tour_done', 'true');
+            localStorage.setItem('reg_tour_done', 'true'); 
+            initPrayerTimes();
         }
     });
 
