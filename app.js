@@ -1942,5 +1942,45 @@ function checkInAppBrowser() {
 
 // Panggil fungsinya saat aplikasi pertama kali dimuat
 document.addEventListener('DOMContentLoaded', () => {
-    checkInAppBrowser();
+    if (typeof checkInAppBrowser === 'function') checkInAppBrowser();
+    if (typeof checkIosInstall === 'function') checkIosInstall(); 
 });
+
+
+// === DETEKSI KHUSUS UNTUK PENGGUNA APPLE (iOS) ===
+function checkIosInstall() {
+    // 1. Cek apakah ini perangkat iOS (iPhone, iPad, iPod)
+    const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent);
+    };
+    
+    // 2. Cek apakah aplikasi SUDAH di-install (berjalan di mode standalone)
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+    // Jika user pakai iPhone/iPad dan BELUM install aplikasi
+    if (isIos() && !isInStandaloneMode()) {
+        const banner = document.getElementById('install-banner');
+        
+        if(banner) {
+            // Ubah teks agar menjadi instruksi khusus iPhone
+            document.querySelector('.install-text h4').innerText = "Pasang di iPhone";
+            document.querySelector('.install-text p').innerText = "Tap ikon Share (Kotak & Panah Atas) di bawah layar, lalu pilih 'Add to Home Screen'.";
+            
+            // Ubah tombol Install menjadi tombol "Mengerti" / "Tutup"
+            const btnInstall = document.querySelector('.btn-install');
+            if(btnInstall) {
+                btnInstall.innerText = "Mengerti";
+                btnInstall.style.background = "#6c757d"; // Ubah warna jadi abu-abu
+                btnInstall.onclick = hideInstallBanner; // Hanya untuk menutup banner
+            }
+            
+            // Tampilkan banner
+            setTimeout(() => {
+                banner.classList.remove('hidden');
+                // Jika Anda punya class animasi seperti 'active' atau 'show', tambahkan di sini
+            }, 1000); 
+        }
+    }
+}
+
