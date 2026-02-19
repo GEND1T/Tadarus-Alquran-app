@@ -304,7 +304,7 @@ function listenToDashboard() {
 
 function calculateSmartTarget(user, capaianHariIni, history) {
     const todayStr = new Date().toISOString().split('T')[0];
-    const ramadhanEnd = new Date("2026-03-19"); 
+    const ramadhanEnd = new Date("2026-03-20"); 
     const today = new Date();
     
     let diffTime = ramadhanEnd - today;
