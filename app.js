@@ -1920,3 +1920,27 @@ function applyViewSettings() {
         container.classList.add('hide-latin');
     }
 }
+
+// === DETEKSI BROWSER INSTAGRAM / SOSMED ===
+function checkInAppBrowser() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    
+    // Deteksi Instagram, Facebook, TikTok, Line
+    const isInApp = (ua.indexOf("Instagram") > -1) || 
+                    (ua.indexOf("FBAN") > -1) || 
+                    (ua.indexOf("FBAV") > -1) || 
+                    (ua.indexOf("TikTok") > -1) ||
+                    (ua.indexOf("Line") > -1);
+
+    if (isInApp) {
+        // Jika dibuka dari Sosmed, tampilkan notifikasi khusus
+        setTimeout(() => {
+            showToast('info', 'Buka di Browser Luar', 'Untuk menginstal aplikasi ini, klik ikon titik tiga (⋮) di pojok kanan atas, lalu pilih "Buka di Chrome/Browser System".');
+        }, 2000); // Munculkan setelah 2 detik
+    }
+}
+
+// Panggil fungsinya saat aplikasi pertama kali dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    checkInAppBrowser();
+});
