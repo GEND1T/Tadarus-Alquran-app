@@ -256,7 +256,7 @@ function listenToDashboard() {
                 logsRef, 
                 window.where("user_id", "==", currentUser),
                 window.orderBy("timestamp", "desc"),
-                window.limit(10)
+                window.limit(100) // <--- NAIKKAN MENJADI 50 atau 100
             );
 
             const logsSnap = await window.getDocs(qLogs);
@@ -304,7 +304,7 @@ function listenToDashboard() {
 
 function calculateSmartTarget(user, capaianHariIni, history) {
     const todayStr = new Date().toISOString().split('T')[0];
-    const ramadhanEnd = new Date("2026-03-20"); 
+    const ramadhanEnd = new Date("2026-03-19"); 
     const today = new Date();
     
     let diffTime = ramadhanEnd - today;
@@ -1983,4 +1983,3 @@ function checkIosInstall() {
         }
     }
 }
-
