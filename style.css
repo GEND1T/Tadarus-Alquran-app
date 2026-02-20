@@ -359,6 +359,7 @@ input:focus { border-color: var(--primary); }
 .status-success { background: var(--gold); } /* Emas untuk Sukses */
 .status-error { background: #dc3545; }   /* Merah untuk Error */
 .status-warning { background: #ffc107; color: #333; } /* Kuning untuk Warning */
+.status-info { background: var(--primary); color: white; }
 
 /* Typography */
 #notif-title { margin-top: 10px; color: var(--text-dark); }

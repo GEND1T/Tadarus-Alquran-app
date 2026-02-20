@@ -1711,7 +1711,7 @@ function renderAyat(verses, surahName, currentChapterId, targetAyat = null) {
             <div class="ayat-meta">
                 <span class="ayat-badge">Ayat ${ayatNum}</span>
                 <button class="btn-save-ayat" onclick="saveFromDigitalQuran(${pageNum}, '${safeSurahName}', ${ayatNum})">
-                    <i class="ph ph-bookmark-simple"></i> Simpan Hal ${pageNum}
+                    <i class="ph ph-bookmark-simple"></i> Simpan Target
                 </button>
             </div>
             
@@ -1772,34 +1772,64 @@ function renderAyat(verses, surahName, currentChapterId, targetAyat = null) {
 // ==========================================
 
 function saveFromDigitalQuran(page, surahName, ayatNum) {
-    // 1. Tutup Tampilan Baca
+    // 1. Tutup Tampilan Baca & Pindah Tab
     closeAyatView();
-    
-    // 2. Pindah ke Tab Home
     switchTab('section-home');
 
-    // 3. [PENTING] Update Variabel Global
-    // Ini kuncinya: Kita paksa isi variabel tempNewPage agar tombol Simpan di modal bekerja
-    tempNewPage = parseInt(page); 
-    tempOldPage = globalPosisiSkrg; // Update posisi lama juga untuk validasi
+    let targetPageToSave = parseInt(page);
+    let isCustomQuran = false;
 
-    // 4. Isi Formulir Input di Dashboard (Visual saja, agar user melihat angkanya berubah)
+    // === LOGIKA KONVERSI QURAN NON-STANDAR ===
+    if (currentUserData && currentUserData.hal_akhir) {
+        // Ambil total halaman Al-Quran fisik milik user
+        const totalFisik = parseInt(currentUserData.hal_akhir);
+        
+        // Cek apakah Quran fisik user BUKAN standar Madinah (kita beri toleransi 600-610)
+        if (totalFisik < 600 || totalFisik > 610) {
+            isCustomQuran = true;
+            
+            // Konversi proporsional: (Hal Digital / 604) * Total Hal Fisik
+            targetPageToSave = Math.round((parseInt(page) / 604) * totalFisik);
+            
+            // Jaga-jaga: Pastikan progres tidak stuck/mundur karena pembulatan
+            if (targetPageToSave <= globalPosisiSkrg) {
+                targetPageToSave = globalPosisiSkrg + 1; 
+            }
+            
+            // Jaga-jaga: Pastikan angka tidak melebihi halaman akhir (tamat)
+            if (targetPageToSave > totalFisik) {
+                targetPageToSave = totalFisik;
+            }
+        }
+    }
+    // ==========================================
+
+    // 2. Update Variabel Global (Gunakan halaman hasil konversi)
+    tempNewPage = targetPageToSave; 
+    tempOldPage = globalPosisiSkrg; 
+
+    // 3. Isi Formulir Input di Dashboard
     const inputField = document.getElementById('input-page');
     if(inputField) {
-        inputField.value = page;
+        inputField.value = targetPageToSave;
     }
 
-    // 5. Isi Data Lengkap ke Modal Bookmark
-    // Karena dari digital Quran, kita sudah tahu pasti Nama Surat & Ayatnya
-    // Jadi kita tidak perlu menebak (getSurahByPage), langsung isi saja.
+    // 4. Isi Data Lengkap ke Modal Bookmark
     document.getElementById('bm-surah').value = surahName;
     document.getElementById('bm-ayat').value = ayatNum;
 
-    // 6. Buka Modal Konfirmasi (Sama seperti saat tekan tombol Simpan manual)
+    // 5. Buka Modal Konfirmasi & Tampilkan Notifikasi Khusus
     setTimeout(() => {
         openModal('modal-bookmark');
-        showToast('info', 'Data Terisi', `Melanjutkan ${surahName} Ayat ${ayatNum}`);
-    }, 300); // Beri jeda sedikit agar transisi tab selesai
+        
+        if (isCustomQuran) {
+            // Notifikasi jika terjadi konversi
+            showToast('info', 'Konversi Skala 🔄', `Halaman ${page} digital disetarakan menjadi halaman ${targetPageToSave} pada Quran fisikmu.`);
+        } else {
+            // Notifikasi normal
+            showToast('info', 'Data Terisi', `Melanjutkan ${surahName} Ayat ${ayatNum}`);
+        }
+    }, 300); 
 }
 
 
@@ -1948,6 +1978,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // === DETEKSI KHUSUS UNTUK PENGGUNA APPLE (iOS) ===
+// === DETEKSI KHUSUS UNTUK PENGGUNA APPLE (iOS) ===
 function checkIosInstall() {
     // 1. Cek apakah ini perangkat iOS (iPhone, iPad, iPod)
     const isIos = () => {
@@ -1963,22 +1994,45 @@ function checkIosInstall() {
         const banner = document.getElementById('install-banner');
         
         if(banner) {
-            // Ubah teks agar menjadi instruksi khusus iPhone
+            // 1. Bikin Teks Rapi (Sesuai Permintaan)
             document.querySelector('.install-text h4').innerText = "Pasang di iPhone";
-            document.querySelector('.install-text p').innerText = "Tap ikon Share (Kotak & Panah Atas) di bawah layar, lalu pilih 'Add to Home Screen'.";
+            document.querySelector('.install-text p').innerText = "Akses lebih cepat & offline.";
             
-            // Ubah tombol Install menjadi tombol "Mengerti" / "Tutup"
+            // 2. Kembalikan Tombol Jadi "Install"
             const btnInstall = document.querySelector('.btn-install');
             if(btnInstall) {
-                btnInstall.innerText = "Mengerti";
-                btnInstall.style.background = "#6c757d"; // Ubah warna jadi abu-abu
-                btnInstall.onclick = hideInstallBanner; // Hanya untuk menutup banner
+                btnInstall.innerText = "Install";
+                btnInstall.style.background = ""; // Hapus warna abu-abu, kembali ke warna CSS asli
+                
+                // 3. Saat diklik, panggil Popup Instruksi
+                btnInstall.onclick = () => {
+                    // Manfaatkan modal notifikasi bawaan
+                    const iconBox = document.getElementById('notif-icon-container');
+                    const icon = document.getElementById('notif-icon');
+                    const h3 = document.getElementById('notif-title');
+                    const p = document.getElementById('notif-msg');
+                    const actionBox = document.getElementById('notif-actions');
+
+                    // Ganti ikon menjadi ikon Share
+                    iconBox.className = 'notif-icon-box status-info'; 
+                    icon.className = 'ph ph-export'; 
+                    
+                    // Isi instruksi instalasi iOS
+                    h3.innerText = 'Cara Install di iOS';
+                    p.innerHTML = "1. Tap ikon <b>Share</b> (kotak dengan panah atas) di menu bar bawah Safari.<br><br>2. Geser menu ke atas, lalu pilih <b>'Add to Home Screen'</b> (Tambahkan ke Layar Utama).";
+
+                    // Tombol Mengerti untuk menutup popup & banner
+                    actionBox.innerHTML = `
+                        <button class="btn-primary btn-full" onclick="closeModal('modal-notif'); hideInstallBanner();">Mengerti</button>
+                    `;
+
+                    openModal('modal-notif');
+                };
             }
             
             // Tampilkan banner
             setTimeout(() => {
                 banner.classList.remove('hidden');
-                // Jika Anda punya class animasi seperti 'active' atau 'show', tambahkan di sini
             }, 1000); 
         }
     }
