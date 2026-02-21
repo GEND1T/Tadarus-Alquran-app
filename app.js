@@ -1,6 +1,35 @@
 // === KONFIGURASI ===
 let myChart = null; // Variabel global untuk menyimpan instance Chart
-let globalHistory = [];
+
+let globalMaghribTime = "18:00"; // Waktu Maghrib Default (Akan diupdate otomatis oleh GPS)
+
+// === FUNGSI CERDAS PERGANTIAN HARI (MAGHRIB) ===
+function getIslamicDateInfo(offsetDays = 0) {
+    const d = new Date(); // Ambil waktu lokal HP user
+    const [mH, mM] = globalMaghribTime.split(':').map(Number); // Pecah jam dan menit Maghrib
+    
+    // Jika jam saat ini SUDAH LEWAT waktu Maghrib, maka hitung sebagai BESOK
+    if (d.getHours() > mH || (d.getHours() === mH && d.getMinutes() >= mM)) {
+        d.setDate(d.getDate() + 1);
+    }
+    
+    // Terapkan pergeseran hari (untuk grafik mundur)
+    if (offsetDays !== 0) {
+        d.setDate(d.getDate() + offsetDays);
+    }
+    
+    // Buat format YYYY-MM-DD
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    
+    return {
+        dateKey: `${year}-${month}-${day}`, // Contoh: "2026-02-22"
+        labelDisplay: d.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}), // Contoh: "22 Feb"
+        fullDateObj: d
+    };
+}
+
 let currentUserData = null;
 // Default Settings: Terjemahan ON, Latin OFF
 let quranSettings = JSON.parse(localStorage.getItem('user_quran_settings')) || {
