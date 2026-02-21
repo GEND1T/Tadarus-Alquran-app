@@ -612,25 +612,18 @@ function renderChart(history) {
     const today = new Date();
 
     // Loop mundur dari hari ini ke 6 hari lalu
+        // Loop mundur 7 hari (Sesuai perhitungan hari Maghrib)
     for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(today.getDate() - i);
-        
-        // Format YYYY-MM-DD untuk pencocokan data
-        const dateKey = d.toISOString().split('T')[0];
-        
-        // Format Tampilan (Misal: "14 Feb")
-        const labelDisplay = d.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
-        labels.push(labelDisplay);
+        const info = getIslamicDateInfo(-i);
+        labels.push(info.labelDisplay);
 
-        // Cari total halaman di tanggal ini dari history
-        // (Kita filter history yang tanggalnya == dateKey, lalu jumlahkan)
         const totalHariIni = history
-            .filter(h => h.date === dateKey)
+            .filter(h => h.date === info.dateKey)
             .reduce((sum, item) => sum + parseInt(item.jumlah), 0);
             
         dataPoints.push(totalHariIni);
     }
+
 
     // 2. HANCURKAN CHART LAMA (PENTING!)
     // Kalau tidak dihancurkan, chart akan menumpuk dan berkedip saat update
@@ -978,19 +971,15 @@ async function generateShareImage() {
     const dataPoints = [];
     const today = new Date();
 
+        // Loop mundur 7 hari (Sesuai perhitungan hari Maghrib)
     for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(today.getDate() - i);
-        labels.push(d.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}));
+        const info = getIslamicDateInfo(-i);
+        labels.push(info.labelDisplay);
 
-        const dateKey = d.toISOString().split('T')[0];
-        // Gunakan globalHistory yang sudah diset di listenToDashboard
-        // Pastikan globalHistory tidak undefined (kasus user baru)
-        const safeHistory = (typeof globalHistory !== 'undefined') ? globalHistory : [];
-        
-        const totalHariIni = safeHistory
-            .filter(h => h.date === dateKey)
+        const totalHariIni = history
+            .filter(h => h.date === info.dateKey)
             .reduce((sum, item) => sum + parseInt(item.jumlah), 0);
+            
         dataPoints.push(totalHariIni);
     }
 
