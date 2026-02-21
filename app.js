@@ -279,7 +279,7 @@ function listenToDashboard() {
             }
             
             // HISTORY LOGS
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getIslamicDateInfo(0).dateKey;
             const logsRef = window.collection(window.db, "logs");
             const qLogs = window.query(
                 logsRef, 
@@ -332,7 +332,7 @@ function listenToDashboard() {
 }
 
 function calculateSmartTarget(user, capaianHariIni, history) {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getIslamicDateInfo(0).dateKey;
     const ramadhanEnd = new Date("2026-03-19"); 
     const today = new Date();
     
@@ -493,7 +493,7 @@ if(formBookmark) {
 
             
             const jumlahDibaca = tempNewPage - tempOldPage;
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getIslamicDateInfo(0).dateKey;
 
             // --- PERUBAHAN DISINI (DITUKAR URUTANNYA) ---
             
