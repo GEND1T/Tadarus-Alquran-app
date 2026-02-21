@@ -611,13 +611,33 @@ function renderChart(history) {
     const dataPoints = [];
     const today = new Date();
 
-    // Loop mundur dari hari ini ke 6 hari lalu
-        // Loop mundur 7 hari (Sesuai perhitungan hari Maghrib)
+    // TENTUKAN TANGGAL MULAI PUASA 
+    const ramadhanStart = new Date("2026-02-19"); 
+    ramadhanStart.setHours(0,0,0,0);
+
+    // Loop mundur 7 hari (Sesuai perhitungan hari Maghrib)
     for (let i = 6; i >= 0; i--) {
         const info = getIslamicDateInfo(-i);
-        labels.push(info.labelDisplay);
+        
+        // --- LOGIKA BARU YANG PRESISI ---
+        const currentChartDate = new Date(info.fullDateObj);
+        currentChartDate.setHours(0,0,0,0); // Wajib di-nol-kan juga
+        
+        const diffTime = currentChartDate - ramadhanStart;
+        const selisihHari = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const dayNum = selisihHari + 1; // Selisih 0 = Hari 1
+        
+        let customLabel = "";
+        if (dayNum > 0 && dayNum <= 30) {
+            customLabel = `Hari ${dayNum}`; 
+        } else {
+            customLabel = info.labelDisplay; 
+        }
+        
+        labels.push(customLabel);
+        // --------------------------------------------------
 
-        const totalHariIni = history
+        const totalHariIni = globalHistory
             .filter(h => h.date === info.dateKey)
             .reduce((sum, item) => sum + parseInt(item.jumlah), 0);
             
@@ -971,20 +991,39 @@ async function generateShareImage() {
     const dataPoints = [];
     const today = new Date();
 
-        // Loop mundur 7 hari (Sesuai perhitungan hari Maghrib)
+    // TENTUKAN TANGGAL MULAI PUASA 
+    const ramadhanStart = new Date("2026-02-19"); 
+    ramadhanStart.setHours(0,0,0,0);
+
+    // Loop mundur 7 hari (Sesuai perhitungan hari Maghrib)
     for (let i = 6; i >= 0; i--) {
         const info = getIslamicDateInfo(-i);
-        labels.push(info.labelDisplay);
+        
+        // --- LOGIKA BARU YANG PRESISI ---
+        const currentChartDate = new Date(info.fullDateObj);
+        currentChartDate.setHours(0,0,0,0); // Wajib di-nol-kan juga
+        
+        const diffTime = currentChartDate - ramadhanStart;
+        const selisihHari = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const dayNum = selisihHari + 1; // Selisih 0 = Hari 1
+        
+        let customLabel = "";
+        if (dayNum > 0 && dayNum <= 30) {
+            customLabel = `Hari ${dayNum}`; 
+        } else {
+            customLabel = info.labelDisplay; 
+        }
+        
+        labels.push(customLabel);
+        // --------------------------------------------------
 
-        const totalHariIni = history
+        const totalHariIni = globalHistory
             .filter(h => h.date === info.dateKey)
             .reduce((sum, item) => sum + parseInt(item.jumlah), 0);
             
         dataPoints.push(totalHariIni);
     }
 
-    // 3. LOGIKA TANGGAL & STATUS
-    const ramadhanStart = new Date("2026-02-18"); 
     const diffTime = Math.abs(today - ramadhanStart);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
     document.getElementById('share-day-num').innerText = diffDays;
@@ -1073,7 +1112,7 @@ function checkShareFeatureTour() {
 
     // 2. Hitung Hari Ramadhan Ke-Berapa
     // (Sesuaikan tanggal ini dengan tanggal mulai puasa di aplikasi)
-    const ramadhanStart = new Date("2026-02-18"); 
+    const ramadhanStart = new Date("2026-02-19"); 
     const today = new Date();
     
     // Hitung selisih waktu
@@ -1124,33 +1163,28 @@ function updateHeaderDate() {
     if (!headerDate) return;
 
     // TENTUKAN TANGGAL MULAI PUASA (1 Ramadhan)
-    // Format: YYYY-MM-DD
-    const startRamadhan = new Date("2026-02-18");
+    const startRamadhan = new Date("2026-02-19");
     startRamadhan.setHours(0,0,0,0);
-        // Menggunakan tanggal yang sudah ditambah jika lewat maghrib
+    
+    // Menggunakan tanggal yang sudah ditambah jika lewat maghrib
     const today = getIslamicDateInfo(0).fullDateObj; 
     today.setHours(0,0,0,0); // Wajib di-nol-kan agar hitungan selisih harinya akurat
     
-
-    // Hitung selisih waktu
+    // Hitung selisih waktu mutlak
     const diffTime = today - startRamadhan;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const selisihHari = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     // Logika Tampilan
-    if (diffDays < 1) {
+    if (selisihHari < 0) {
         // Belum mulai (H-Sekian)
-        const daysLeft = Math.abs(diffDays);
+        const daysLeft = Math.abs(selisihHari);
         headerDate.innerText = `Menuju Ramadhan (${daysLeft} Hari Lagi)`;
-    } else if (diffDays > 30) {
+    } else if (selisihHari >= 30) {
         // Sudah lewat (Syawal)
         headerDate.innerText = "1 Syawal 1447 H (Taqabbalallahu Minna)";
     } else {
-        // Sedang Berjalan
-        // +1 karena diffDays start dari 0 jika hari yang sama, tapi kita pakai Math.ceil jadi aman 1
-        // Mari kita pastikan logika hari ke-1:
-        // Jika today == startRamadhan, diff ~0. Sesuatu yang kecil. Math.ceil akan 1 (jika jam today > start)
-        // Kita kunci saja agar minimal 1.
-        const currentDay = diffDays < 1 ? 1 : diffDays;
+        // Sedang Berjalan (Selisih 0 hari = Hari 1)
+        const currentDay = selisihHari + 1;
         headerDate.innerText = `${currentDay} Ramadhan 1447 H`;
     }
 }
@@ -1220,14 +1254,15 @@ function setupRatingUIListener() {
 // --- BAGIAN 2: LOGIKA TRIGGER (Panggil di dalam listenToDashboard) ---
 function checkDay26Trigger() {
     // TENTUKAN TANGGAL MULAI PUASA
-    const ramadhanStart = new Date("2026-02-18"); // <--- PASTI KAN INI BENAR
+    const ramadhanStart = new Date("2026-02-19"); // <--- PASTI KAN INI BENAR
     ramadhanStart.setHours(0,0,0,0);
         // Menggunakan tanggal yang sudah ditambah jika lewat maghrib
     const today = getIslamicDateInfo(0).fullDateObj; 
     today.setHours(0,0,0,0); // Wajib di-nol-kan agar hitungan selisih harinya akurat
 
     const diffTime = today - ramadhanStart;
-    const dayNum = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const selisihHari = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const dayNum = selisihHari + 1;
 
     // --- TIPS DEBUGGING ---
     // Agar bisa ngetes SEKARANG, ubah angka '26' di bawah menjadi angka hari ini.
