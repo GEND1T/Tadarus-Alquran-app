@@ -984,7 +984,7 @@ async function generateShareImage() {
     }
 
     // 3. LOGIKA TANGGAL & STATUS
-    const ramadhanStart = new Date("2026-02-18"); 
+    const ramadhanStart = new Date("2026-02-19"); 
     const diffTime = Math.abs(today - ramadhanStart);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
     document.getElementById('share-day-num').innerText = diffDays;
