@@ -1125,8 +1125,12 @@ function updateHeaderDate() {
 
     // TENTUKAN TANGGAL MULAI PUASA (1 Ramadhan)
     // Format: YYYY-MM-DD
-    const startRamadhan = new Date("2026-02-19"); 
-    const today = new Date();
+    const startRamadhan = new Date("2026-02-19");
+    startRamadhan.setHours(0,0,0,0);
+        // Menggunakan tanggal yang sudah ditambah jika lewat maghrib
+    const today = getIslamicDateInfo(0).fullDateObj; 
+    today.setHours(0,0,0,0); // Wajib di-nol-kan agar hitungan selisih harinya akurat
+    
 
     // Hitung selisih waktu
     const diffTime = today - startRamadhan;
@@ -1217,7 +1221,11 @@ function setupRatingUIListener() {
 function checkDay26Trigger() {
     // TENTUKAN TANGGAL MULAI PUASA
     const ramadhanStart = new Date("2026-02-19"); // <--- PASTI KAN INI BENAR
-    const today = new Date();
+    ramadhanStart.setHours(0,0,0,0);
+        // Menggunakan tanggal yang sudah ditambah jika lewat maghrib
+    const today = getIslamicDateInfo(0).fullDateObj; 
+    today.setHours(0,0,0,0); // Wajib di-nol-kan agar hitungan selisih harinya akurat
+
     const diffTime = today - ramadhanStart;
     const dayNum = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
