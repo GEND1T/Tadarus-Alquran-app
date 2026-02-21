@@ -613,7 +613,7 @@ function renderChart(history) {
 
     // Loop mundur dari hari ini ke 6 hari lalu
         // Loop mundur 7 hari (Sesuai perhitungan hari Maghrib)
-    for (let i = 7; i >= 0; i--) {
+    for (let i = 6; i >= 0; i--) {
         const info = getIslamicDateInfo(-i);
         labels.push(info.labelDisplay);
 
