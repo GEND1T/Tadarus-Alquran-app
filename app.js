@@ -984,7 +984,7 @@ async function generateShareImage() {
     }
 
     // 3. LOGIKA TANGGAL & STATUS
-    const ramadhanStart = new Date("2026-02-19"); 
+    const ramadhanStart = new Date("2026-02-18"); 
     const diffTime = Math.abs(today - ramadhanStart);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
     document.getElementById('share-day-num').innerText = diffDays;
@@ -1073,7 +1073,7 @@ function checkShareFeatureTour() {
 
     // 2. Hitung Hari Ramadhan Ke-Berapa
     // (Sesuaikan tanggal ini dengan tanggal mulai puasa di aplikasi)
-    const ramadhanStart = new Date("2026-02-19"); 
+    const ramadhanStart = new Date("2026-02-18"); 
     const today = new Date();
     
     // Hitung selisih waktu
@@ -1125,7 +1125,7 @@ function updateHeaderDate() {
 
     // TENTUKAN TANGGAL MULAI PUASA (1 Ramadhan)
     // Format: YYYY-MM-DD
-    const startRamadhan = new Date("2026-02-19");
+    const startRamadhan = new Date("2026-02-18");
     startRamadhan.setHours(0,0,0,0);
         // Menggunakan tanggal yang sudah ditambah jika lewat maghrib
     const today = getIslamicDateInfo(0).fullDateObj; 
@@ -1220,7 +1220,7 @@ function setupRatingUIListener() {
 // --- BAGIAN 2: LOGIKA TRIGGER (Panggil di dalam listenToDashboard) ---
 function checkDay26Trigger() {
     // TENTUKAN TANGGAL MULAI PUASA
-    const ramadhanStart = new Date("2026-02-19"); // <--- PASTI KAN INI BENAR
+    const ramadhanStart = new Date("2026-02-18"); // <--- PASTI KAN INI BENAR
     ramadhanStart.setHours(0,0,0,0);
         // Menggunakan tanggal yang sudah ditambah jika lewat maghrib
     const today = getIslamicDateInfo(0).fullDateObj; 
