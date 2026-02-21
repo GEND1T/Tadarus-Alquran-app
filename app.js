@@ -1440,6 +1440,7 @@ async function fetchPrayerData(lat, lng, isDefault = false) {
         const response = await fetch(url);
         const data = await response.json();
         const timings = data.data.timings;
+        globalMaghribTime = timings.Maghrib; // Simpan jam maghrib lokasi user saat ini
 
         renderPrayerList(timings);
         startPrayerCountdown(timings);
